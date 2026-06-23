@@ -1,0 +1,237 @@
+
+                        <!DOCTYPE html>
+                        <html lang="en">
+                        <head>
+                            <meta charset="UTF-8">
+                            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+							<style>
+								body {
+									background-color: white; /* Ensure the iframe has a white background */
+								}
+
+								
+							</style>
+                        </head>
+                        <body>
+                            <!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>离型纸四国竞争分析 (动态大屏部署版)</title>
+    <!-- 引入 ECharts 官方动态库 -->
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <style>
+        /* ========================================================
+           1. 完美 16:9 大屏刚性布局 (零溢出约束)
+           ======================================================== */
+        :root {
+            --bg-body: #111827; 
+            --bg-slide: #ffffff;
+            --us-color: #2563eb; --de-color: #ea580c; 
+            --uk-color: #7c3aed; --ca-color: #0d9488; 
+        }
+
+        body {
+            margin: 0; padding: 0; height: 100vh; width: 100vw;
+            display: flex; align-items: center; justify-content: center;
+            background-color: var(--bg-body); overflow: hidden; 
+            font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+        }
+
+        .ppt-canvas {
+            position: relative;
+            width: 96vw; height: calc(96vw * 9 / 16);
+            max-height: 94vh; max-width: calc(94vh * 16 / 9);
+            background: var(--bg-slide); border-radius: 12px;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.5);
+            display: flex; flex-direction: column; overflow: hidden; box-sizing: border-box;
+            container-type: inline-size; padding: 2.5cqi 3cqi;
+        }
+
+        /* ========================================================
+           2. 标题区
+           ======================================================== */
+        .header { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 2px solid #f3f4f6; padding-bottom: 1cqi; margin-bottom: 1.5cqi; }
+        .header h1 { margin: 0; font-size: 2.5cqi; color: #111827; font-weight: 900; letter-spacing: 0.1cqi; }
+        .header p { margin: 0; font-size: 1cqi; color: #6b7280; text-transform: uppercase; margin-top: 0.5cqi;}
+
+        /* ========================================================
+           3. 核心动态图表区
+           ======================================================== */
+        .charts-container { display: flex; gap: 2cqi; flex: 1; min-height: 0; margin-bottom: 2cqi; }
+        .chart-box {
+            flex: 1; background: #fafafa; border-radius: 1cqi; border: 1px solid #f3f4f6;
+            position: relative; overflow: hidden; display: flex; flex-direction: column;
+            transition: box-shadow 0.3s ease;
+        }
+        .chart-box:hover { box-shadow: 0 6px 20px rgba(0,0,0,0.04); }
+        .echarts-dom { align-self: center; width: 100%; height: 100%; }
+
+        /* ========================================================
+           4. 底部战略结论区
+           ======================================================== */
+        .conclusions { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5cqi; flex-shrink: 0; height: auto; }
+        .concl-card {
+            background: #f8fafc; border-radius: 0.8cqi; padding: 1.2cqi; position: relative;
+            border: 1px solid #e2e8f0; display: flex; flex-direction: column; gap: 0.5cqi;
+            transition: transform 0.3s ease;
+        }
+        .concl-card:hover { transform: translateY(-0.3cqi); }
+        .c-head { display: flex; align-items: center; gap: 0.8cqi; }
+        .c-head span.flag { font-size: 1.8cqi; }
+        .c-head h3 { margin: 0; font-size: 1.35cqi; color: #1f2937; }
+        .c-body { font-size: 0.95cqi; line-height: 1.6; color: #4b5563; font-weight: 500; margin: 0;}
+
+        .concl-card.us { border-left: 0.5cqi solid var(--us-color); }
+        .concl-card.de { border-left: 0.5cqi solid var(--de-color); }
+        .concl-card.uk { border-left: 0.5cqi solid var(--uk-color); }
+        .concl-card.ca { border-left: 0.5cqi solid var(--ca-color); }
+    </style>
+</head>
+<body>
+
+    <div class="ppt-canvas">
+        <div class="header">
+            <div>
+                <!-- 只修改了这里的主标题 -->
+                <h1>离型纸四国竞争分析</h1>
+                <p>商业表现与战略定盘回顾</p>
+            </div>
+        </div>
+
+        <div class="charts-container">
+            <div class="chart-box">
+                <div id="pieChart" class="echarts-dom"></div>
+            </div>
+            <div class="chart-box" style="flex: 1.4;">
+                <div id="barLineChart" class="echarts-dom"></div>
+            </div>
+        </div>
+
+        <div class="conclusions">
+            <div class="concl-card us">
+                <div class="c-head"><span class="flag">🇺🇸</span><h3>美国</h3></div>
+                <p class="c-body">占据全球七成以上体量的绝对主战场，需重兵把守第一坑位，稳固品牌的核心基本盘。</p>
+            </div>
+            <div class="concl-card de">
+                <div class="c-head"><span class="flag">🇩🇪</span><h3>德国</h3></div>
+                <p class="c-body">欧洲最大的子市场，需重点压制势头凶猛、定价相同的本土强敌（Picmondoo）以保住领先地位。</p>
+            </div>
+            <div class="concl-card uk">
+                <div class="c-head"><span class="flag">🇬🇧</span><h3>英国</h3></div>
+                <p class="c-body">深陷低价内卷的微型市场，无需降价肉搏，靠品牌和评价护城河佛系保利润即可。</p>
+            </div>
+            <div class="concl-card ca">
+                <div class="c-head"><span class="flag">🇨🇦</span><h3>加拿大</h3></div>
+                <p class="c-body">毫无竞争压力的“纯利润提款机”，维持高溢价和不断货，自动收割垄断收益。</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // === 图表1：四国销售额分布 ===
+        var pieChart = echarts.init(document.getElementById('pieChart'));
+        var pieOption = {
+            title: { text: '四国销售额分布', left: 'center', top: '5%', textStyle: { color: '#374151', fontSize: 18 } },
+            tooltip: { show: false }, 
+            legend: { bottom: '4%', icon: 'circle', itemGap: 20 },
+            color: ['#2563eb', '#0d9488', '#7c3aed', '#ea580c'],
+            series: [{
+                name: '销售占比', type: 'pie',
+                radius: ['45%', '70%'],
+                center: ['50%', '50%'],
+                itemStyle: { borderRadius: 6, borderColor: '#fafafa', borderWidth: 2 },
+                label: { show: true, formatter: '{b}\n{c}%', fontSize: 13, fontWeight: 'bold', color: '#374151' }, 
+                data: [
+                    { value: 72.62, name: '美国' },
+                    { value: 3.40, name: '加拿大' },
+                    { value: 10.96, name: '英国' },
+                    { value: 13.01, name: '德国' }
+                ],
+                emphasis: { focus: 'self', label: { show: true, fontSize: 15 } }
+            }]
+        };
+        pieChart.setOption(pieOption);
+
+
+        // === 图表2：四国竞争态势 ===
+        var barLineChart = echarts.init(document.getElementById('barLineChart'));
+        
+        var barLineOption = {
+            title: { text: '四国竞争态势', left: 'center', top: '5%', textStyle: { color: '#374151', fontSize: 18 } },
+            tooltip: { show: false }, 
+            legend: { data: ['商品集中度', '品牌集中度', '新品占比', '毛利率'], top: '13%', icon: 'roundRect', itemGap: 15 },
+            grid: { left: '8%', right: '8%', bottom: '12%', top: '27%', containLabel: true },
+            xAxis: [{ type: 'category', data: ['美国', '加拿大', '英国', '德国'], axisLabel: { fontWeight: 'bold', fontSize: 13, color: '#4b5563' } }],
+            yAxis: [
+                { type: 'value', min: 0, max: 110, interval: 20, axisLabel: { formatter: '{value}%', color: '#9ca3af' }, splitLine: { lineStyle: { type: 'dashed', color: '#f3f4f6' } } },
+                { type: 'value', min: 0, max: 100, interval: 20, axisLabel: { formatter: '{value}%', color: '#9ca3af' }, splitLine: { show: false } }
+            ],
+            series: [
+                { 
+                    name: '商品集中度', type: 'bar', barWidth: '16%', 
+                    itemStyle: { color: '#60a5fa', borderRadius: [4,4,0,0] }, 
+                    data: [80.41, 100.00, 86.60, 100.00],
+                    label: { show: false, position: 'top', formatter: '{c}%', color: '#60a5fa', fontWeight: 'bold' },
+                    emphasis: { focus: 'series' } 
+                },
+                { 
+                    name: '品牌集中度', type: 'bar', barWidth: '16%', 
+                    itemStyle: { color: '#34d399', borderRadius: [4,4,0,0] }, 
+                    data: [90.28, 100.00, 93.40, 100.00],
+                    label: { show: false, position: 'top', formatter: '{c}%', color: '#34d399', fontWeight: 'bold' },
+                    emphasis: { focus: 'series' }
+                },
+                { 
+                    name: '新品占比', type: 'line', yAxisIndex: 0, symbolSize: 10, 
+                    lineStyle: { width: 3, type: 'dashed', color: '#fb923c' }, 
+                    itemStyle: { color: '#fb923c' }, 
+                    data: [20.93, 22.22, 15.00, 30.00],
+                    label: { show: false, position: 'top', formatter: '{c}%', color: '#ea580c', fontWeight: 'bold' },
+                    emphasis: { focus: 'series' }
+                },
+                { 
+                    name: '毛利率', type: 'line', yAxisIndex: 1, symbolSize: 10, 
+                    lineStyle: { width: 3, color: '#f43f5e' }, 
+                    itemStyle: { color: '#f43f5e' }, 
+                    data: [50.98, 46.39, 68.66, 52.88],
+                    label: { show: false, position: 'bottom', formatter: '{c}%', color: '#e11d48', fontWeight: 'bold' },
+                    emphasis: { focus: 'series' }
+                }
+            ]
+        };
+        barLineChart.setOption(barLineOption);
+
+        // ==========================================
+        // 核心技术：外挂级事件拦截，实现四国数据同显
+        // ==========================================
+        barLineChart.on('mouseover', function (params) {
+            if (params.componentType === 'series') {
+                const updateSeries = [0, 1, 2, 3].map(idx => {
+                    return { label: { show: idx === params.seriesIndex } };
+                });
+                barLineChart.setOption({ series: updateSeries });
+            }
+        });
+
+        barLineChart.on('mouseout', function (params) {
+            if (params.componentType === 'series') {
+                barLineChart.setOption({ series: [{label:{show:false}}, {label:{show:false}}, {label:{show:false}}, {label:{show:false}}] });
+            }
+        });
+
+        window.addEventListener('resize', function() {
+            pieChart.resize();
+            barLineChart.resize();
+        });
+    </script>
+</body>
+</html>
+
+							<script>
+                            	
+							</script>
+                        </body>
+                        </html>
+                    

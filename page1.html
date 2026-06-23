@@ -1,0 +1,211 @@
+
+                        <!DOCTYPE html>
+                        <html lang="en">
+                        <head>
+                            <meta charset="UTF-8">
+                            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+							<style>
+								body {
+									background-color: white; /* Ensure the iframe has a white background */
+								}
+
+								
+							</style>
+                        </head>
+                        <body>
+                            <!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>离型纸立项</title>
+    <style>
+        /* =========================================================
+           基础重置与视口控制 
+           ========================================================= */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body, html {
+            width: 100vw;
+            height: 100vh;
+            background-color: #f0f2f5; /* 屏幕外围的暗色底衬，用以凸显中间的 PPT 白纸 */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+
+        /* =========================================================
+           核心容器：严格 16:9 比例与防溢出
+           ========================================================= */
+        .slide-container {
+            aspect-ratio: 16 / 9;
+            width: 100%;
+            max-width: 1600px;
+            max-height: 98vh;
+            min-height: 0;
+            background-color: #ffffff; /* 纯白极简画板 */
+            position: relative;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08); /* 画布阴影立体感 */
+            overflow: hidden; /* 绝对禁止内部元素溢出 */
+            display: flex;
+            justify-content: center; /* 绝对居中 */
+            align-items: center;     /* 绝对居中 */
+        }
+
+        /* =========================================================
+           背景细节：还原图片中极淡的氛围圈，充盈 16:9 空间
+           ========================================================= */
+        .bg-decoration {
+            position: absolute;
+            border-radius: 50%;
+            border: 1px solid rgba(100, 120, 250, 0.04); /* 极度克制的淡紫罗兰色线条 */
+            pointer-events: none; /* 防止遮挡交互 */
+            z-index: 1;
+        }
+
+        /* 右上角大圆环组 */
+        .circle-tr-1 {
+            width: 80vw;
+            height: 80vw;
+            top: -40vw;
+            right: -30vw;
+            animation: breathe 12s infinite alternate ease-in-out;
+        }
+        
+        .circle-tr-2 {
+            width: 60vw;
+            height: 60vw;
+            top: -30vw;
+            right: -20vw;
+            border-width: 1.5px;
+            border-color: rgba(100, 120, 250, 0.02);
+            animation: breathe 15s infinite alternate-reverse ease-in-out;
+        }
+
+        /* 左下角小圆 */
+        .circle-bl-1 {
+            width: 35vw;
+            height: 35vw;
+            bottom: -15vw;
+            left: -10vw;
+            animation: breathe 10s infinite alternate ease-in-out;
+        }
+
+        /* 左上角极淡圆 */
+        .circle-tl-1 {
+            width: 50vw;
+            height: 50vw;
+            top: -25vw;
+            left: -20vw;
+            border-color: rgba(100, 120, 250, 0.03);
+            animation: breathe 14s infinite alternate ease-in-out;
+        }
+
+
+        /* =========================================================
+           中心内容排版区 
+           ========================================================= */
+        .content-box {
+            position: relative;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* 主标题样式：还原粗体与蓝紫渐变 */
+        .main-title {
+            /* 严格平铺：使用大字号，响应式缩放 */
+            font-size: clamp(60px, 8vw, 130px); 
+            font-weight: 900;
+            letter-spacing: 0.05em;
+            margin: 0;
+            /* 左偏蓝，右偏紫 的平滑渐变 */
+            background: linear-gradient(90deg, #3753f2 0%, #7e30e7 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            /* 用滤镜添加极弱的发光/投射，提升质感不死板 */
+            filter: drop-shadow(0px 10px 20px rgba(80, 50, 230, 0.15));
+            
+            /* 入场动画 */
+            opacity: 0;
+            transform: translateY(20px);
+            animation: title-reveal 1s cubic-bezier(0.2, 0.8, 0.2, 1) 0.3s forwards;
+        }
+
+        /* 主标题下方的渐变短线 */
+        .accent-divider {
+            width: 12%;       /* 宽度相对约束 */
+            min-width: 80px;
+            height: 6px;      /* 粗细适中 */
+            margin-top: 35px; /* 与文字间的呼吸感留白 */
+            border-radius: 4px;
+            /* 还原图片中的淡蓝向淡紫渐变 */
+            background: linear-gradient(90deg, #81b1f6 0%, #c4aaef 100%);
+            
+            /* 入场动画：从正中心向两端展开 */
+            transform-origin: center;
+            transform: scaleX(0);
+            animation: line-expand 0.8s cubic-bezier(0.8, 0, 0.2, 1) 0.8s forwards;
+        }
+
+        /* =========================================================
+           动态关键帧 
+           ========================================================= */
+        @keyframes title-reveal {
+            0% { 
+                opacity: 0; 
+                transform: translateY(30px) scale(0.98); 
+            }
+            100% { 
+                opacity: 1; 
+                transform: translateY(0) scale(1); 
+            }
+        }
+
+        @keyframes line-expand {
+            0% { transform: scaleX(0); }
+            100% { transform: scaleX(1); }
+        }
+
+        @keyframes breathe {
+            0% { transform: scale(1); }
+            100% { transform: scale(1.05); }
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- 16:9 画板容器 -->
+    <div class="slide-container">
+        
+        <!-- 大面积留白空间的几何弱装点 (还原原图隐藏细节) -->
+        <div class="bg-decoration circle-tr-1"></div>
+        <div class="bg-decoration circle-tr-2"></div>
+        <div class="bg-decoration circle-tl-1"></div>
+        <div class="bg-decoration circle-bl-1"></div>
+
+        <!-- 中心视点组 -->
+        <div class="content-box">
+            <h1 class="main-title">离型纸立项</h1>
+            <div class="accent-divider"></div>
+        </div>
+
+    </div>
+
+</body>
+</html>
+
+							<script>
+                            	
+							</script>
+                        </body>
+                        </html>
+                    

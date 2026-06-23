@@ -1,0 +1,407 @@
+
+                        <!DOCTYPE html>
+                        <html lang="en">
+                        <head>
+                            <meta charset="UTF-8">
+                            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+							<style>
+								body {
+									background-color: white; /* Ensure the iframe has a white background */
+								}
+
+								
+							</style>
+                        </head>
+                        <body>
+                            <!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>离型纸产品细分图谱</title>
+    <style>
+        /* ================= 基础背景重置 ================= */
+        body {
+            margin: 0;
+            padding: 0;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #1E1E1E;
+            font-family: -apple-system, 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            overflow: hidden;
+        }
+
+        /* 强制 16:9 画布：刚性约束，绝不让内容溢出半个像素 */
+        .slide-canvas {
+            width: 1600px;
+            aspect-ratio: 16 / 9; /* 核心16:9约束 */
+            background-color: #FFFFFF;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            padding: 25px 45px; /* 进一步压榨页面外圈空隙 */
+            box-sizing: border-box;
+            max-width: 98vw;
+            max-height: 98vh;
+            overflow: hidden; /* 保证底板规整 */
+        }
+
+        /* ================= 主标题区（极致精简高度） ================= */
+        .main-header {
+            flex: 0 0 auto; 
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #F1F5F9;
+            padding-bottom: 10px;
+        }
+        .main-title {
+            font-size: 32px;
+            font-weight: 900;
+            color: #0F172A;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            letter-spacing: 1px;
+        }
+        .main-title::before {
+            content: "";
+            display: inline-block;
+            width: 6px;
+            height: 30px;
+            background: #3B82F6;
+            margin-right: 12px;
+            border-radius: 3px;
+        }
+        .control-btn {
+            background: #F8FAFC; border: 1px solid #E2E8F0; padding: 6px 14px; border-radius: 6px; 
+            font-weight: bold; color: #475569; cursor: pointer; transition: 0.2s; font-size: 13px;
+        }
+        .control-btn:hover { background: #E2E8F0; color: #0F172A; }
+
+        /* ================= 核心流式内容区 ================= */
+        .content-area {
+            flex: 1; 
+            min-height: 0; 
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            gap: 15px; 
+        }
+
+        .platform-section {
+            flex: 1; /* 上下排均匀分割 */
+            min-height: 0; 
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* 小标题：字号拉小，让位给核心卡片空间 */
+        .sub-title-bar {
+            flex: 0 0 auto;
+            margin-bottom: 8px; 
+        }
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 12px;
+            border-radius: 4px;
+            color: white;
+            font-family: Arial, sans-serif;
+            font-size: 14px; /* 字体改小非常多 */
+            font-weight: bold;
+            letter-spacing: 1px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .badge.amazon { background-color: #232F3E; color: #FF9900; }
+        .badge.etsy { background-color: #F56400; color: #FFFFFF; }
+
+        /* ================= 产品卡片流 ================= */
+        .cards-track {
+            flex: 1; 
+            min-height: 0; 
+            display: flex;
+            gap: 15px;
+        }
+
+        /* 卡片主体：移除 overflow:hidden，用于支持图片越界悬浮放大 */
+        .card {
+            flex: 1; 
+            background: #FFFFFF;
+            border: 1px solid #E2E8F0;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+            transition: transform 0.3s, box-shadow 0.3s;
+            position: relative; 
+        }
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 25px rgba(0,0,0,0.08);
+            border-color: #CBD5E1;
+            z-index: 10; /* 卡片浮起防阻挡 */
+        }
+
+        /* 卡片头部色带 (单独给圆角适配外框) */
+        .card-header {
+            flex: 0 0 auto;
+            font-size: 14px;
+            font-weight: bold;
+            color: white;
+            text-align: center;
+            padding: 6px 0;
+            letter-spacing: 2px;
+            border-radius: 9px 9px 0 0; 
+        }
+        .bg-paper { background: linear-gradient(90deg, #3B82F6, #60A5FA); }
+        .bg-film { background: linear-gradient(90deg, #10B981, #34D399); }
+        .bg-card { background: linear-gradient(90deg, #EC4899, #F472B6); }
+        .bg-frame { background: linear-gradient(90deg, #8B5CF6, #A78BFA); }
+
+        /* ================= 重点重构区：图片空间占比极大提升 & 放大互动 ================= */
+        .img-box {
+            flex: 0 0 44%; /* 图片展示区提高至 44% */
+            min-height: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #F8FAFC;
+            border-bottom: 1px dashed #E2E8F0;
+            padding: 6px;
+            box-sizing: border-box;
+            position: relative; /* 为绝对定位缩放打底 */
+        }
+        
+        .img-box img {
+            max-width: 90%;
+            max-height: 90%;
+            object-fit: contain;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.05));
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            cursor: zoom-in;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* 鼠标悬停 -> 显微镜级别放大展示图片 (突破卡片边界) */
+        .img-box img:hover {
+            transform: scale(1.85); /* 放大 1.85 倍 */
+            z-index: 9999;
+            background-color: #FFFFFF;
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.25); /* 强力立体阴影与底座剥离 */
+            border: 1px solid #E2E8F0;
+        }
+
+        /* ================= 极简排版约束：规格表区 ================= */
+        .attr-box {
+            flex: 1;
+            padding: 6px 12px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around; 
+            min-height: 0;
+        }
+
+        .attr-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #F8FAFC;
+            padding-bottom: 4px;
+        }
+        .attr-item:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+        
+        .attr-label {
+            font-size: 12px; /* 字体微调变小，极致节省空间 */
+            color: #64748B;
+            font-weight: 500;
+        }
+        
+        .attr-val {
+            font-size: 12px; /* 字体微调变小 */
+            font-weight: 700;
+            color: #0F172A;
+            background-color: #F4F6F9;
+            padding: 4px 6px;
+            border-radius: 4px;
+            text-align: right;
+            max-width: 68%;
+            word-break: break-word; 
+            line-height: 1.25;
+        }
+        .val-none { 
+            color: #94A3B8; font-weight: 400; background: transparent; padding: 0;
+        }
+
+        /* 统一平滑入场动画 */
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .anim { opacity: 0; animation: fadeUp 0.5s ease-out forwards; }
+        .d-0 { animation-delay: 0.1s; } 
+        .d-1 { animation-delay: 0.2s; } 
+        .d-2 { animation-delay: 0.3s; } 
+        .d-3 { animation-delay: 0.35s;} 
+        .d-4 { animation-delay: 0.4s; } 
+        .d-5 { animation-delay: 0.45s;} 
+        .d-6 { animation-delay: 0.5s; } 
+        .d-7 { animation-delay: 0.6s; } 
+        .d-8 { animation-delay: 0.7s; } 
+        .d-9 { animation-delay: 0.75s;} 
+        .d-10{ animation-delay: 0.8s; } 
+
+    </style>
+</head>
+<body>
+
+    <!-- 严格 16:9 画布边界 -->
+    <div class="slide-canvas" id="pptWindow">
+
+        <div class="main-header anim d-0">
+            <h1 class="main-title">离型纸产品细分</h1>
+            <button class="control-btn" onclick="location.reload()">重新播放动画</button>
+        </div>
+
+        <div class="content-area">
+
+            <!-- ================= 上区：Amazon ================= -->
+            <div class="platform-section">
+                <!-- 极度缩小的平台标签 -->
+                <div class="sub-title-bar anim d-1">
+                    <span class="badge amazon">Amazon</span>
+                </div>
+                
+                <div class="cards-track">
+                    <!-- Amazon 1 -->
+                    <div class="card anim d-2">
+                        <div class="card-header bg-paper">离型纸</div>
+                        <div class="img-box"><img src="https://wp-cdn.4ce.cn/v2/5xj8H31.png" alt="Pic1"></div>
+                        <div class="attr-box">
+                            <div class="attr-item"><span class="attr-label">基材</span><span class="attr-val">纸张 (格拉辛纸)</span></div>
+                            <div class="attr-item"><span class="attr-label">透明度</span><span class="attr-val">半透明</span></div>
+                            <div class="attr-item"><span class="attr-label">防粘</span><span class="attr-val">双面硅油</span></div>
+                            <div class="attr-item"><span class="attr-label">外观设计</span><span class="attr-val val-none">——</span></div>
+                        </div>
+                    </div>
+
+                    <!-- Amazon 2 -->
+                    <div class="card anim d-3">
+                        <div class="card-header bg-paper">离型纸</div>
+                        <div class="img-box"><img src="https://wp-cdn.4ce.cn/v2/6GsHPOv.png" alt="Pic2"></div>
+                        <div class="attr-box">
+                            <div class="attr-item"><span class="attr-label">基材</span><span class="attr-val">纸张 (格拉辛纸)</span></div>
+                            <div class="attr-item"><span class="attr-label">透明度</span><span class="attr-val">半透明</span></div>
+                            <div class="attr-item"><span class="attr-label">防粘</span><span class="attr-val">双面硅油</span></div>
+                            <div class="attr-item"><span class="attr-label">外观设计</span><span class="attr-val">品牌 logo</span></div>
+                        </div>
+                    </div>
+
+                    <!-- Amazon 3 -->
+                    <div class="card anim d-4">
+                        <div class="card-header bg-paper">离型纸</div>
+                        <div class="img-box"><img src="https://wp-cdn.4ce.cn/v2/8sT67Sy.png" alt="Pic3"></div>
+                        <div class="attr-box">
+                            <div class="attr-item"><span class="attr-label">基材</span><span class="attr-val">纸张 (格拉辛纸)</span></div>
+                            <div class="attr-item"><span class="attr-label">透明度</span><span class="attr-val">半透明</span></div>
+                            <div class="attr-item"><span class="attr-label">防粘</span><span class="attr-val">双面硅油</span></div>
+                            <div class="attr-item"><span class="attr-label">外观设计</span><span class="attr-val val-none">——</span></div>
+                        </div>
+                    </div>
+
+                    <!-- Amazon 4 -->
+                    <div class="card anim d-5">
+                        <div class="card-header bg-paper">离型纸</div>
+                        <div class="img-box"><img src="https://wp-cdn.4ce.cn/v2/mQGrdP9.png" alt="Pic4"></div>
+                        <div class="attr-box">
+                            <div class="attr-item"><span class="attr-label">基材</span><span class="attr-val">纸张 (格拉辛纸)</span></div>
+                            <div class="attr-item"><span class="attr-label">透明度</span><span class="attr-val">半透明</span></div>
+                            <div class="attr-item"><span class="attr-label">防粘</span><span class="attr-val">双面硅油</span></div>
+                            <div class="attr-item"><span class="attr-label">外观设计</span><span class="attr-val">品牌logo+自裁网格</span></div>
+                        </div>
+                    </div>
+
+                    <!-- Amazon 5 -->
+                    <div class="card anim d-6">
+                        <div class="card-header bg-film">离型膜</div>
+                        <div class="img-box"><img src="https://wp-cdn.4ce.cn/v2/xp6FcSv.png" alt="Pic5"></div>
+                        <div class="attr-box">
+                            <div class="attr-item"><span class="attr-label">基材</span><span class="attr-val">塑料膜 (PET)</span></div>
+                            <div class="attr-item"><span class="attr-label">透明度</span><span class="attr-val">全透明</span></div>
+                            <!-- ※修改响应※：修改为“单面硅油” -->
+                            <div class="attr-item"><span class="attr-label">防粘</span><span class="attr-val">单面硅油</span></div>
+                            <div class="attr-item"><span class="attr-label">外观设计</span><span class="attr-val val-none">——</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ================= 下区：Etsy ================= -->
+            <div class="platform-section">
+                <!-- 极度缩小的平台标签 -->
+                <div class="sub-title-bar anim d-7">
+                    <span class="badge etsy">Etsy</span>
+                </div>
+                
+                <div class="cards-track">
+                    <!-- Etsy 1 -->
+                    <div class="card anim d-8">
+                        <div class="card-header bg-card">离型卡</div>
+                        <div class="img-box"><img src="https://wp-cdn.4ce.cn/v2/fnsSN4n.png" alt="Etsy1"></div>
+                        <div class="attr-box">
+                            <div class="attr-item"><span class="attr-label">基材</span><span class="attr-val">卡纸 (白卡纸)</span></div>
+                            <div class="attr-item"><span class="attr-label">透明度</span><span class="attr-val">不透明</span></div>
+                            <div class="attr-item"><span class="attr-label">防粘</span><span class="attr-val">单面硅油</span></div>
+                            <div class="attr-item"><span class="attr-label">外观设计</span><span class="attr-val">规律印花</span></div>
+                        </div>
+                    </div>
+
+                    <!-- Etsy 2 -->
+                    <div class="card anim d-9">
+                        <div class="card-header bg-card">离型卡</div>
+                        <div class="img-box"><img src="https://wp-cdn.4ce.cn/v2/ggWbvEt.png" alt="Etsy2"></div>
+                        <div class="attr-box">
+                            <div class="attr-item"><span class="attr-label">基材</span><span class="attr-val">卡纸 (白卡纸)</span></div>
+                            <div class="attr-item"><span class="attr-label">透明度</span><span class="attr-val">不透明</span></div>
+                            <div class="attr-item"><span class="attr-label">防粘</span><span class="attr-val">单面硅油</span></div>
+                            <div class="attr-item"><span class="attr-label">外观设计</span><span class="attr-val">定制图案+哑光/亮面/全息覆膜</span></div>
+                        </div>
+                    </div>
+
+                    <!-- Etsy 3 -->
+                    <div class="card anim d-10">
+                        <div class="card-header bg-frame">分区框</div>
+                        <div class="img-box"><img src="https://wp-cdn.4ce.cn/v2/waHSTaI.png" alt="Etsy3"></div>
+                        <div class="attr-box">
+                            <div class="attr-item"><span class="attr-label">基材</span><span class="attr-val">塑料边框 (PVC)</span></div>
+                            <div class="attr-item"><span class="attr-label">透明度</span><span class="attr-val">全透明</span></div>
+                            <div class="attr-item"><span class="attr-label">防粘</span><span class="attr-val">无膜片</span></div>
+                            <div class="attr-item"><span class="attr-label">外观设计</span><span class="attr-val">浅彩色系星云</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</body>
+</html>
+
+							<script>
+                            	
+							</script>
+                        </body>
+                        </html>
+                    

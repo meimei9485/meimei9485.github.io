@@ -1,0 +1,325 @@
+
+                        <!DOCTYPE html>
+                        <html lang="en">
+                        <head>
+                            <meta charset="UTF-8">
+                            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+							<style>
+								body {
+									background-color: white; /* Ensure the iframe has a white background */
+								}
+
+								
+							</style>
+                        </head>
+                        <body>
+                            <!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>企业级图表洞察报告 PPT</title>
+    <!-- 引入 ECharts -->
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+    <style>
+        /* ==========================================
+           基础与极简商务设计规范
+        ========================================== */
+        :root {
+            --bg-color: #eef1f6;      /* 外围环境背景 */
+            --canvas-bg: #ffffff;     /* 画布背景色 */
+            --primary: #1D39C4;       /* 品牌主色 深蓝 */
+            --text-main: #1D2129;     /* 主标题及核心字 */
+            --text-sub: #4E5969;      /* 副文及正文内容 */
+            --border-color: #E5E6EB; /* 浅色分割线 */
+            --card-bg: #F7F8FA;       /* 卡片背景 */
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body, html {
+            width: 100vw; height: 100vh;
+            background-color: var(--bg-color);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            display: flex; align-items: center; justify-content: center;
+            overflow: hidden; /* 绝对禁止外部滚动 */
+        }
+
+        /* ==========================================
+           1. 严格 16:9 尺寸刚性控制 (核心容器)
+        ========================================== */
+        .ppt-screen {
+            width: 96vw;
+            max-width: 1800px;
+            /* 根据宽度自动计算16:9高度，同时兜底最大高度保证不超出视口 */
+            aspect-ratio: 16 / 9;
+            max-height: 96vh;
+            background: var(--canvas-bg);
+            border-radius: 12px;
+            box-shadow: 0 12px 48px rgba(0, 0, 0, 0.08); /* 隐约高级阴影 */
+            display: flex;
+            flex-direction: column;
+            overflow: hidden; 
+            padding: 2.5%;
+        }
+
+        /* 顶部标题区 (仅占必要空间) */
+        .header {
+            flex-shrink: 0;
+            display: flex; justify-content: space-between; align-items: flex-end;
+            padding-bottom: 1.5%;
+            border-bottom: 2px solid var(--border-color);
+            margin-bottom: 2%;
+        }
+        .header h1 { font-size: clamp(20px, 2.2vw, 32px); color: var(--text-main); font-weight: 600; letter-spacing: 1px; }
+        .header .meta { font-size: clamp(12px, 1vw, 16px); color: var(--text-sub); display: flex; gap: 15px; }
+
+        /* ==========================================
+           2. 极限平铺布局 (主体内容极度压榨空白)
+        ========================================== */
+        .content-engine {
+            flex: 1; /* 吞没所有剩余高度 */
+            min-height: 0; /* 打破 Flex 默认尺寸，防止溢出 */
+            display: grid;
+            grid-template-columns: 6.5fr 3.5fr; /* 左图表:右结论 黄金比例 */
+            gap: 2%;
+        }
+
+        /* 左侧：双图表均分区域 */
+        .charts-container {
+            display: flex; flex-direction: column; gap: 2.5%; height: 100%; min-height: 0;
+        }
+
+        .chart-card {
+            flex: 1; min-height: 0;
+            background: var(--canvas-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            position: relative; /* 为图表绝对占比提供锚点 */
+            overflow: hidden;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.02);
+        }
+        
+        /* 强制 Echarts 画布填满独立卡片每一丝像素 */
+        .echarts-instance { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+
+        /* 右侧：结论洞察区 - 垂直极简铺满 */
+        .insights-container {
+            display: flex; flex-direction: column; gap: 3%; height: 100%; min-height: 0;
+        }
+
+        .insight-card {
+            flex: 1; min-height: 0;
+            background: var(--card-bg);
+            border-left: 5px solid var(--primary);
+            border-radius: 6px;
+            padding: 4% 6%;
+            display: flex; flex-direction: column; justify-content: center;
+            transition: all 0.2s ease;
+        }
+        .insight-card:hover { transform: translateX(-4px); background: #f0f3fa; box-shadow: 2px 4px 12px rgba(0,0,0,0.04); }
+
+        /* 结论卡片文字排版 */
+        .ic-title { font-size: clamp(14px, 1.1vw, 18px); color: var(--text-main); font-weight: 700; margin-bottom: 2%; }
+        .ic-desc { 
+            font-size: clamp(12px, 0.95vw, 16px); 
+            color: var(--text-sub); 
+            line-height: 1.6; 
+            display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; /* 保障字数增加时不溢出 */
+        }
+        .highlight { color: var(--primary); font-weight: 600; }
+        .alert { color: #eb2f96; font-weight: 600; }
+        .growth { color: #52c41a; font-weight: 600; }
+    </style>
+</head>
+<body>
+
+    <div class="ppt-screen">
+        <!-- Header -->
+        <header class="header">
+            <!-- 唯一调整点：仅仅更新了标题文案 -->
+            <h1>离型纸品类对比分析</h1>
+            <div class="meta">
+                <span>Category: Tool Accessories</span>
+                <span>Date: 2026.04</span>
+            </div>
+        </header>
+
+        <!-- Main Engine -->
+        <main class="content-engine">
+            <!-- Left: 图表渲染矩阵 -->
+            <section class="charts-container">
+                <div class="chart-card">
+                    <div id="chart-bubble" class="echarts-instance"></div>
+                </div>
+                <div class="chart-card">
+                    <div id="chart-bar" class="echarts-instance"></div>
+                </div>
+            </section>
+
+            <!-- Right: Insights 观点矩阵 -->
+            <section class="insights-container">
+                <div class="insight-card" style="border-left-color: #2F54EB;">
+                    <div class="ic-title">规模层级定性：最小细分品类</div>
+                    <div class="ic-desc">离型纸年销售额 <span class="highlight">115万美金</span>，当前体量属于钻石画工具中 <span class="highlight">规模最小</span> 的单用途辅助品类。</div>
+                </div>
+                <div class="insight-card" style="border-left-color: #13C2C2;">
+                    <div class="ic-title">市占率与品牌集中度：TOP 1</div>
+                    <div class="ic-desc">26年4月数据：AD在离型纸销售额市占率达 <span class="highlight">28%</span>，销量占 <span class="highlight">29%</span>，稳居品牌类目排名 <span class="alert">TOP 1</span>。<br>对比画布收纳（超40%）与钻石收纳（近40%）的高市占率，该品类仍拥有 <span class="highlight">近10% 的垄断增量空间</span>。</div>
+                </div>
+                <div class="insight-card" style="border-left-color: #52C41A;">
+                    <div class="ic-title">市场增速呈现：良性增长态势</div>
+                    <div class="ic-desc">年同比销售额及销量均处于中等增速（<span class="growth">+35%</span>），正处上升期。对比同样高市占率的画布收纳（销售额同比 <span class="alert">-22%</span>，销量停滞）与钻石收纳（销售额同比 <span class="growth">+18%</span>，销量 <span class="growth">+17%</span>），离型纸增速优势更为显著。</div>
+                </div>
+                <div class="insight-card" style="border-left-color: #FA8C16;">
+                    <div class="ic-title">客单价波动观察：大盘企稳</div>
+                    <div class="ic-desc">年同比客单价基本持平，截止2026年4月单价均线维持在 <span class="highlight">$9.11</span> (微跌 -0.46%)。</div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        /* ==============================================
+           全局 ECharts 实例及尺寸控制方案
+        ============================================== */
+        const chartBubbleInfo = echarts.init(document.getElementById('chart-bubble'));
+        const chartBarInfo = echarts.init(document.getElementById('chart-bar'));
+
+        /* ---------- 图表1：气泡图 ---------- */
+        const rawBubbleData = [
+            [1437.49, 23871.64, 16.61, '相框'],
+            [276.44, 5351.43, 19.36, '放大镜'],
+            [63.04, 1557.50, 24.71, '光板'],
+            [74.87, 1232.86, 16.47, '钻石收纳'],
+            [48.95, 631.24, 12.90, '点钻笔'],
+            [54.33, 522.83, 9.62, '密封胶'],
+            [61.08, 412.14, 6.75, '钻盘'],
+            [10.60, 176.36, 16.63, '画布收纳'],
+            [11.26, 128.88, 11.45, '钻包'],
+            [17.75, 124.06, 6.99, '胶泥'],
+            [12.79, 116.56, 9.11, '离型纸']
+        ];
+        const colorPalette = ['#FF69B4', '#32CD32', '#1D39C4', '#FADB14', '#722ED1', '#FA541C', '#13C2C2', '#EB2F96', '#52C41A', '#2F54EB', '#FA8C16'];
+        
+        const bubbleSeries = rawBubbleData.map(function (item, index) {
+            return {
+                name: item[3], type: 'scatter', data: [item],
+                symbolSize: function (data) { return data[2] * 3.5; },
+                itemStyle: { color: colorPalette[index % colorPalette.length], shadowBlur: 8, shadowColor: 'rgba(0,0,0,0.2)', shadowOffsetY: 2, opacity: 0.85 },
+                label: { show: true, formatter: '{a}', position: 'top', fontSize: 12, fontWeight: 'bold', color: '#1a1a1a' },
+                emphasis: { focus: 'series' }
+            };
+        });
+
+        const optionBubble = {
+            title: {
+                text: '工具品类气泡矩阵展示', subtext: 'X/Y 对数轴散开，气泡对应客单价',
+                left: '2%', top: '2%',
+                textStyle: { fontSize: 16, color: '#1D2129', fontWeight: 'bold' },
+                subtextStyle: { fontSize: 11, color: '#86909C' }
+            },
+            legend: { top: '3%', right: '2%', width: '50%', itemWidth: 10, itemHeight: 10, textStyle: { fontSize: 10 }, data: rawBubbleData.map(item => item[3]) },
+            tooltip: {
+                trigger: 'item', backgroundColor: 'rgba(255,255,255,0.95)', borderColor: '#eee', borderWidth: 1, padding: [10, 15],
+                formatter: function (params) {
+                    let d = params.data;
+                    return `<div style="font-size:14px; font-weight:bold; margin-bottom:8px; border-bottom:2px solid ${params.color}; padding-bottom:4px;">${d[3]}</div>` +
+                           `<div style="font-size: 13px; line-height: 20px;">` +
+                           `<span style="display:inline-block;width:55px;color:#777">销售额：</span><b style="color:#d9363e;">${d[1]}</b> 万$ <br/>` +
+                           `<span style="display:inline-block;width:55px;color:#777">销 量：</span><b style="color:#2f54eb;">${d[0]}</b> 万 <br/>` +
+                           `<span style="display:inline-block;width:55px;color:#777">客单价：</span><b style="color:#52c41a;">$ ${d[2]}</b></div>`;
+                }
+            },
+            grid: { left: '3%', right: '8%', bottom: '8%', top: '20%', containLabel: true },
+            xAxis: {
+                type: 'log', logBase: 10, name: '销量 (万件)', nameTextStyle: { fontSize: 11, fontWeight: 'bold' },
+                splitLine: { show: true, lineStyle: { type: 'dashed', color: '#eaeaea' } }, axisLabel: { fontSize: 11 }
+            },
+            yAxis: {
+                type: 'log', logBase: 10, name: '销售额 (万美元)', nameTextStyle: { fontSize: 11, fontWeight: 'bold' },
+                splitLine: { show: true, lineStyle: { type: 'dashed', color: '#eaeaea' } }, axisLabel: { fontSize: 11 }
+            },
+            series: bubbleSeries
+        };
+
+
+        /* ---------- 图表2：多维柱状图 ---------- */
+        const categories = ['放大镜', '画布收纳', '钻石收纳', '点钻笔', '光板', '密封胶', '相框', '钻盘', '钻包', '胶泥', '离型纸'];
+        
+        function getSeriesConfig(name, color, data) {
+            return {
+                name: name, type: 'bar', barGap: '20%', itemStyle: { color: color, borderRadius: [2,2,0,0] }, data: data,
+                label: { show: false }, // 默认不显示，悬浮才显示
+                emphasis: {
+                    focus: 'series',
+                    label: { show: true, position: 'top', formatter: '{c}%', fontSize: 11, fontWeight: 'bold', color: color, textBorderColor: '#fff', textBorderWidth: 2 }
+                }
+            };
+        }
+
+        const optionBar = {
+            title: {
+                text: '工具品类3级指标全局一览表', subtext: '悬浮鼠标点亮全局同类数据指标',
+                left: '2%', top: '2%',
+                textStyle: { fontSize: 16, color: '#1D2129', fontWeight: 'bold' },
+                subtextStyle: { fontSize: 11, color: '#86909C' }
+            },
+            tooltip: {
+                trigger: 'item', backgroundColor: 'rgba(255, 255, 255, 0.95)', borderColor: '#eee', borderWidth: 1, padding: 10,
+                formatter: function (params) {
+                    return `<div style="font-weight:bold;margin-bottom:3px;font-size:12px">${params.name}</div>` +
+                           `<div style="font-size:13px">${params.marker} ${params.seriesName}: <b style="color:${params.color}">${params.value}%</b></div>`;
+                }
+            },
+            legend: { top: '3%', right: '2%', itemGap: 15, itemWidth: 12, itemHeight: 8, textStyle: { fontSize: 11 }, data: ['销售额-同比', '销量-同比', '销售额-AD市占率', '销量-AD市占率'] },
+            grid: { left: '3%', right: '3%', bottom: '5%', top: '20%', containLabel: true },
+            xAxis: { type: 'category', boundaryGap: true, data: categories, axisLabel: { interval: 0, fontSize: 11 }, axisLine: { lineStyle: { color: '#ccc' } } },
+            yAxis: { type: 'value', axisLabel: { formatter: '{value} %', fontSize: 11 }, splitLine: { lineStyle: { type: 'dashed', color: '#f0f0f0' } } },
+            series: [
+                getSeriesConfig('销售额-同比', '#FF85C0', [51, -22, 18, 68, -3, 1, 30, 201, 27, 38, 35]),
+                getSeriesConfig('销量-同比', '#73D13D', [39, 0, 17, 40, 6, 11, 43, 140, 42, 34, 35]),
+                getSeriesConfig('销售额-AD市占率', '#2F54EB', [3, 41, 38, 15, 7, 7, 0, 12, 20, 13, 28]),
+                getSeriesConfig('销量-AD市占率', '#69B1FF', [2, 47, 39, 9, 11, 5, 0, 39, 12, 12, 29])
+            ]
+        };
+
+        chartBubbleInfo.setOption(optionBubble);
+        chartBarInfo.setOption(optionBar);
+
+        /* --- 柱状图核心交互事件引擎：悬浮触发同组高亮 --- */
+        chartBarInfo.on('mouseover', function(e) {
+            if (e.componentType === 'series') {
+                chartBarInfo.dispatchAction({ type: 'highlight', seriesName: e.seriesName });
+            }
+        });
+        chartBarInfo.on('mouseout', function(e) {
+            if (e.componentType === 'series') {
+                chartBarInfo.dispatchAction({ type: 'downplay', seriesName: e.seriesName });
+            }
+        });
+
+        /* ==============================================
+           容器极速响应与自适应守护策略
+        ============================================== */
+        // 使用 ResizeObserver 提供更平滑、现代的无溢出重绘支持，优于传统的 window resize
+        const resizeObserver = new ResizeObserver(() => {
+            chartBubbleInfo.resize();
+            chartBarInfo.resize();
+        });
+        
+        // 绑定监听器到 Echarts 外层画布以确保精确
+        document.querySelectorAll('.chart-card').forEach(card => {
+            resizeObserver.observe(card);
+        });
+
+    </script>
+</body>
+</html>
+
+							<script>
+                            	
+							</script>
+                        </body>
+                        </html>
+                    
