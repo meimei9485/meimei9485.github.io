@@ -32,7 +32,7 @@
         body, html {
             width: 100vw;
             height: 100vh;
-            background-color: #f0f2f5; /* 屏幕外围的暗色底衬，用以凸显中间的 PPT 白纸 */
+            background-color: #f0f2f5; 
             display: flex;
             justify-content: center;
             align-items: center;
@@ -49,13 +49,13 @@
             max-width: 1600px;
             max-height: 98vh;
             min-height: 0;
-            background-color: #ffffff; /* 纯白极简画板 */
+            background-color: #ffffff; 
             position: relative;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08); /* 画布阴影立体感 */
-            overflow: hidden; /* 绝对禁止内部元素溢出 */
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08); 
+            overflow: hidden; 
             display: flex;
-            justify-content: center; /* 绝对居中 */
-            align-items: center;     /* 绝对居中 */
+            justify-content: center; 
+            align-items: center;     
         }
 
         /* =========================================================
@@ -64,8 +64,8 @@
         .bg-decoration {
             position: absolute;
             border-radius: 50%;
-            border: 1px solid rgba(100, 120, 250, 0.04); /* 极度克制的淡紫罗兰色线条 */
-            pointer-events: none; /* 防止遮挡交互 */
+            border: 1px solid rgba(100, 120, 250, 0.04); 
+            pointer-events: none; 
             z-index: 1;
         }
 
@@ -119,37 +119,34 @@
             align-items: center;
         }
 
-        /* 主标题样式：还原粗体与蓝紫渐变 */
+        /* 主标题样式：修改为黑色 */
         .main-title {
-            /* 严格平铺：使用大字号，响应式缩放 */
             font-size: clamp(60px, 8vw, 130px); 
             font-weight: 900;
             letter-spacing: 0.05em;
             margin: 0;
-            /* 左偏蓝，右偏紫 的平滑渐变 */
-            background: linear-gradient(90deg, #3753f2 0%, #7e30e7 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            /* 用滤镜添加极弱的发光/投射，提升质感不死板 */
-            filter: drop-shadow(0px 10px 20px rgba(80, 50, 230, 0.15));
+            /* 修改 1：文字更新为更具高级感和阅读性的纯正深黑 */
+            color: #111111; 
+            /* 投影更新为适配黑色字体的中性极淡灰，保持立体剥离感 */
+            filter: drop-shadow(0px 10px 20px rgba(0, 0, 0, 0.08));
             
-            /* 入场动画 */
+            /* 入场动画保持不变 */
             opacity: 0;
             transform: translateY(20px);
             animation: title-reveal 1s cubic-bezier(0.2, 0.8, 0.2, 1) 0.3s forwards;
         }
 
-        /* 主标题下方的渐变短线 */
+        /* 主标题下方的渐变短线：修改为薄荷蓝 */
         .accent-divider {
-            width: 12%;       /* 宽度相对约束 */
+            width: 12%;       
             min-width: 80px;
-            height: 6px;      /* 粗细适中 */
-            margin-top: 35px; /* 与文字间的呼吸感留白 */
+            height: 6px;      
+            margin-top: 35px; 
             border-radius: 4px;
-            /* 还原图片中的淡蓝向淡紫渐变 */
-            background: linear-gradient(90deg, #81b1f6 0%, #c4aaef 100%);
+            /* 修改 2：更新为清新亮眼的薄荷蓝渐变 */
+            background: linear-gradient(90deg, #36d1c4 0%, #7cf0e6 100%);
             
-            /* 入场动画：从正中心向两端展开 */
+            /* 入场动画保持不变 */
             transform-origin: center;
             transform: scaleX(0);
             animation: line-expand 0.8s cubic-bezier(0.8, 0, 0.2, 1) 0.8s forwards;
@@ -186,7 +183,7 @@
     <!-- 16:9 画板容器 -->
     <div class="slide-container">
         
-        <!-- 大面积留白空间的几何弱装点 (还原原图隐藏细节) -->
+        <!-- 大面积留白空间的几何弱装点 -->
         <div class="bg-decoration circle-tr-1"></div>
         <div class="bg-decoration circle-tr-2"></div>
         <div class="bg-decoration circle-tl-1"></div>

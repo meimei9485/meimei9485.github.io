@@ -95,22 +95,22 @@
            ========================================================= */
         .ppt-content {
             flex: 1 1 0;
-            min-height: 0; /* WebKit/Firefox 必备高度收缩防溢出 */
+            min-height: 0; 
             display: flex;
             flex-direction: column;
-            gap: 2%; /* 媒体层与结论层的纵向间距 */
+            gap: 2%; 
         }
 
         /* --- 媒体横列（视频/图片排在一排） --- */
         .media-row {
-            flex: 1 1 0; /* 自动填充满剩余纵向空间 */
+            flex: 1 1 0;
             display: flex;
-            gap: 1.5%; /* 卡片间隔 */
+            gap: 1.5%; 
             min-height: 0;
         }
 
         .card {
-            flex: 1 1 0; /* 横向四等分均摊 */
+            flex: 1 1 0; 
             background: #fafafb;
             border: 1px solid #e5e7eb;
             border-radius: 8px;
@@ -133,12 +133,12 @@
             flex: 1 1 0;
             min-height: 0;
             position: relative;
-            background: #f3f4f6; /* 媒体浅灰底色 */
+            background: #f3f4f6;
             display: flex;
             justify-content: center;
             align-items: center;
             overflow: hidden;
-            padding: 3%; /* 稍微留边，透出底色，视觉更舒服 */
+            padding: 3%; 
         }
 
         /* 核心：确保内容完整全貌，绝对不遮拦裁剪 */
@@ -156,7 +156,7 @@
             padding: 4% 5%;
             background: #ffffff;
             color: #374151;
-            font-size: clamp(0.9rem, 1.1vw, 1.1rem); /* 自适应缩放字号 */
+            font-size: clamp(0.9rem, 1.1vw, 1.1rem); 
             font-weight: 600;
             text-align: center;
             border-top: 1px solid #e5e7eb;
@@ -168,13 +168,13 @@
         /* --- 底部结论 Banner --- */
         .solution-banner {
             flex: 0 0 auto;
-            background: #eff6ff; /* 商务浅蓝衬底 */
+            background: #eff6ff; 
             border: 1px solid #bfdbfe;
             border-radius: 8px;
             padding: 1.5% 3%;
             display: flex;
             align-items: center;
-            gap: 2%; /* 标签和文字的间距 */
+            gap: 2%;
             border-left: 6px solid #2563eb;
             
             opacity: 0;
@@ -196,7 +196,7 @@
 
         .solution-banner h2 {
             color: #0f172a;
-            font-size: clamp(1.2rem, 1.8vw, 1.6rem); /* 缩小至克制阅读尺寸 */
+            font-size: clamp(1.2rem, 1.8vw, 1.6rem); 
             font-weight: 700;
             margin: 0;
         }
@@ -259,9 +259,11 @@
                 <!-- 图片4 -->
                 <div class="card">
                     <div class="media-box">
-                        <img src="https://wp-cdn.4ce.cn/v2/8rENtXk.png" alt="保护膜剥离标">
+                        <!-- alt 属性已更新 -->
+                        <img src="https://wp-cdn.4ce.cn/v2/8rENtXk.png" alt="手机保护膜—剥离标">
                     </div>
-                    <div class="text-bar">保护膜剥离标</div>
+                    <!-- 描述文字已更新 -->
+                    <div class="text-bar">手机保护膜—剥离标</div>
                 </div>
 
             </section>

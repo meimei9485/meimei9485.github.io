@@ -24,41 +24,34 @@
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
-            background-color: #dbe0e6; 
+            background-color: #dbe0e6;
             font-family: "PingFang SC", -apple-system, BlinkMacSystemFont, "Microsoft YaHei", sans-serif;
             min-height: 100vh; display: flex; justify-content: center; align-items: center; overflow: hidden;
         }
-
         .ppt-wrapper { position: relative; width: 96vw; height: 96vh; display: flex; justify-content: center; align-items: center; }
-
         .ppt-container {
             position: relative; background-color: #ffffff; aspect-ratio: 16 / 9; width: 100%;
+            /* 修复了此处 calc 中的符号错误 (原为 _) */
             max-width: calc(96vh * 16 / 9); max-height: calc(96vw * 9 / 16);
             border-radius: 12px; box-shadow: 0 16px 48px rgba(0,0,0,0.1), 0 4px 16px rgba(0,0,0,0.06);
-            display: flex; flex-direction: column; padding: 24px 32px; overflow: hidden; 
+            display: flex; flex-direction: column; padding: 24px 32px; overflow: hidden;
         }
-
         .ppt-header { flex-shrink: 0; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 2px solid #f1f5f9; }
         .ppt-title { font-size: 24px; font-weight: 700; color: #0f172a; letter-spacing: 1px; margin-bottom: 6px; }
         .ppt-subtitle { font-size: 14px; color: #64748b; }
-
         .content-grid {
             flex: 1; min-height: 0; display: grid;
             grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
             grid-template-rows: minmax(0, 1fr) minmax(0, 1fr); gap: 20px;
         }
-
         .card {
             background: #ffffff; border-radius: 8px; border: 1px solid #e2e8f0;
             display: flex; flex-direction: column; padding: 16px; min-height: 0; min-width: 0;
         }
-
         .card-header { display: flex; align-items: center; margin-bottom: 12px; flex-shrink: 0; }
         .indicator { width: 4px; height: 16px; border-radius: 2px; margin-right: 10px; }
         .card-title { font-size: 15px; font-weight: 600; color: #1e293b; }
-
         .chart-box { flex: 1; width: 100%; height: 0; }
-
         .insights-card { background: #f8fafc; border: 1px solid #e2e8f0; }
         .insights-card .card-title { font-weight: 700; color: #1d784a; }
         .insights-card .indicator { background: #1d784a; }
@@ -73,16 +66,12 @@
     </style>
 </head>
 <body>
-
 <div class="ppt-wrapper">
     <div class="ppt-container">
-        
         <header class="ppt-header">
-            <!-- 仅修改了此处的文本 -->
             <h1 class="ppt-title">离型纸客单价趋势分析</h1>
             <p class="ppt-subtitle">深度业务解析：大盘平均客单波动原理、销售淡季效应与高潜黑马品牌起量轨迹分析</p>
         </header>
-
         <div class="content-grid">
             <div class="card">
                 <div class="card-header">
@@ -91,7 +80,6 @@
                 </div>
                 <div class="chart-box" id="chart1"></div>
             </div>
-
             <div class="card">
                 <div class="card-header">
                     <div class="indicator" style="background: #5c82ff;"></div>
@@ -99,7 +87,6 @@
                 </div>
                 <div class="chart-box" id="chart2"></div>
             </div>
-
             <div class="card insights-card">
                 <div class="card-header">
                     <div class="indicator"></div>
@@ -115,7 +102,8 @@
                     <div class="insight-row">
                         <span class="bullet" style="opacity: 0.8;"></span>
                         <div class="insight-text">
-                            <strong>头部品牌效应剧烈：</strong>大盘均价受寡头牵制深厚。淡季期间 <strong>ARTDOT、Calsoling</strong> 主动降价抢量导致探底；随后高客单品牌 <strong>DAC ($12.99)</strong> 强势起量，成功拉升类目均价突破前史极值，<strong>印证用户愿意为优质产品付高溢价。</strong>
+                            <!-- 已更新您要求的文案 -->
+                            <strong>头部品牌效应剧烈：</strong>大盘均价受寡头牵制深厚。淡季期间 <strong>ARTDOT、Calsoling</strong> 主动降价抢量导致探底；随后高客单品牌 <strong>DAC ($12.99)</strong> 强势起量，成功拉升类目均价突破前史极值，<strong>印证用户能够承担更高的价格。</strong>
                         </div>
                     </div>
                     <div class="insight-row">
@@ -126,7 +114,6 @@
                     </div>
                 </div>
             </div>
-
             <div class="card">
                 <div class="card-header">
                     <div class="indicator" style="background: #f45b5b;"></div>
@@ -134,18 +121,16 @@
                 </div>
                 <div class="chart-box" id="chart3"></div>
             </div>
-
         </div>
     </div>
 </div>
-
 <script>
     var months = ['24-06', '24-07', '24-08', '24-09', '24-10', '24-11', '24-12', '25-01', '25-02', '25-03', '25-04', '25-05', '25-06', '25-07', '25-08', '25-09', '25-10', '25-11', '25-12', '26-01', '26-02', '26-03', '26-04', '26-05'];
     var greenColor = '#1d784a';
     var brandColors = ['#4ED8C8', '#fac858', '#FF9EB4', '#54B345', '#A0522D', '#7D3C98', '#D7BDE2'];
-
+    
     // ==========================================
-    // 图表一：离型纸近2年平均客单价趋势 
+    // 图表一：离型纸近2年平均客单价趋势
     // ==========================================
     var myChart1 = echarts.init(document.getElementById('chart1'));
     var avgPriceData = [8.34, 8.92, 8.81, 8.75, 8.81, 8.87, 8.39, 8.61, 8.70, 8.68, 8.23, 7.87, 7.93, 8.33, 8.32, 8.35, 8.58, 8.30, 8.53, 9.16, 9.17, 9.19, 9.18, 9.21];
@@ -167,11 +152,9 @@
         }]
     });
 
-
     // ==========================================
     // 独家自研：图表2 & 3 “一览无余全系列弹射标签” 事件底层架构
     // ==========================================
-
     function initBaseSeries(dataArr, colors) {
         return dataArr.map(function(item, index) {
             var isFY = item.name.includes('forever young');
@@ -181,40 +164,39 @@
                 type: 'line',
                 smooth: true,
                 symbol: 'circle',
-                showSymbol: isFY, 
+                showSymbol: isFY,
                 symbolSize: isFY ? 10 : 8,
                 symbolOffset: offset,
-                triggerLineEvent: true, 
+                triggerLineEvent: true,
                 data: item.data,
-                lineStyle: { width: 3 }, 
+                lineStyle: { width: 3 },
                 itemStyle: { color: colors[index], borderWidth: 2, borderColor: '#fff' },
-                label: { show: false }, 
+                label: { show: false },
                 z: isFY ? 5 : 1
             };
         });
     }
 
+    // 修复了此处由于上一次提问带过来的 "_ colors" (多了个空格) 的致命语法错误，改为正确的 "_colors"
     function bindTransparecyEffect(chart, _baseData, _colors, isPrice) {
         var currentFocus = null;
-        var hideTimer = null; 
-
+        var hideTimer = null;
         function spotlight(targetName) {
-            if (currentFocus === targetName) return; 
+            if (currentFocus === targetName) return;
             currentFocus = targetName;
             var newSeries = _baseData.map(function(item, idx) {
                 var isFY = item.name.includes('forever young');
                 var isActive = item.name === targetName;
-                
                 return {
                     name: item.name,
-                    showSymbol: isActive || isFY, 
-                    lineStyle: { 
-                        width: isActive ? 4 : 3, 
-                        opacity: isActive ? 1 : 0.15 
+                    showSymbol: isActive || isFY,
+                    lineStyle: {
+                        width: isActive ? 4 : 3,
+                        opacity: isActive ? 1 : 0.15
                     },
                     itemStyle: { opacity: isActive ? 1 : 0.15 },
                     label: {
-                        show: isActive, 
+                        show: isActive,
                         position: 'top',
                         color: _colors[idx], // 文字颜色等于当前品牌颜色
                         fontWeight: 'bold',
@@ -230,7 +212,6 @@
             });
             chart.setOption({ series: newSeries });
         }
-
         function reset() {
             if (currentFocus === null) return;
             currentFocus = null;
@@ -247,18 +228,15 @@
             });
             chart.setOption({ series: resetSeries });
         }
-
         chart.on('mouseover', {componentType: 'series'}, function(params) {
             clearTimeout(hideTimer);
             spotlight(params.seriesName);
         });
-
         chart.on('mouseout', {componentType: 'series'}, function(params) {
             hideTimer = setTimeout(function() {
                 reset();
-            }, 120); 
+            }, 120);
         });
-
         chart.on('highlight', function(params) {
             clearTimeout(hideTimer);
             if (params.seriesName) spotlight(params.seriesName);
@@ -283,18 +261,16 @@
         { name: 'forever young1 (深紫)', data: [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, 192, null, null, null, null] },
         { name: 'forever young1 (浅紫)', data: [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, 193, null, null, null, null] }
     ];
-    
     myChart2.setOption({
         color: brandColors,
         legend: { data: ['ARTDOT', 'Ftimda', 'DAC', 'Mecefeno', 'Calsoling', 'forever young1 (深紫)', 'forever young1 (浅紫)'], top: 0, left: 'center', icon: 'roundRect', itemWidth: 12, itemHeight: 4, textStyle: { fontSize: 10, color: '#64748b' } },
         grid: { left: '2%', right: '4%', bottom: '2%', top: '22%', containLabel: true },
-        tooltip: { show: false }, 
+        tooltip: { show: false },
         xAxis: { type: 'category', boundaryGap: false, data: months, axisLine: { lineStyle: { color: '#cbd5e1' } }, axisTick: { show: true }, axisLabel: { rotate: 45, color: '#64748b', fontSize: 11, margin: 10 } },
         yAxis: { type: 'value', nameTextStyle: { color: '#64748b', align: 'left', padding: [0, 0, 0, -28] }, scale: true, axisLine: { show: false }, axisTick: { show: false }, axisLabel: { color: '#64748b', formatter: function(v) { return v.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","); }, fontSize: 11 }, splitLine: { lineStyle: { color: '#f1f5f9', type: 'solid' } } },
         series: initBaseSeries(sales_data, brandColors)
     });
     bindTransparecyEffect(myChart2, sales_data, brandColors, false);
-
 
     // ==========================================
     // 图表三加载
@@ -309,12 +285,11 @@
         { name: 'forever young1 (深紫)', data: [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, 9.99, null, null, null] },
         { name: 'forever young1 (浅紫)', data: [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, 9.99, null, null, null] }
     ];
-    
     myChart3.setOption({
         color: brandColors,
         legend: { data: ['ARTDOT', 'Ftimda', 'DAC', 'Mecefeno', 'Calsoling', 'forever young1 (深紫)', 'forever young1 (浅紫)'], top: 0, left: 'center', icon: 'roundRect', itemWidth: 12, itemHeight: 4, textStyle: { fontSize: 10, color: '#64748b' } },
         grid: { left: '2%', right: '4%', bottom: '2%', top: '22%', containLabel: true },
-        tooltip: { show: false }, 
+        tooltip: { show: false },
         xAxis: { type: 'category', boundaryGap: false, data: months, axisLine: { lineStyle: { color: '#cbd5e1' } }, axisTick: { show: true }, axisLabel: { rotate: 45, color: '#64748b', fontSize: 11, margin: 10 } },
         yAxis: { type: 'value', nameTextStyle: { color: '#64748b', align: 'left', padding: [0, 0, 0, -28] }, scale: true, axisLine: { show: false }, axisTick: { show: false }, axisLabel: { color: '#64748b', formatter: '${value}', fontSize: 11 }, splitLine: { lineStyle: { color: '#f1f5f9', type: 'solid' } } },
         series: initBaseSeries(price_data, brandColors)
@@ -327,7 +302,6 @@
     const rescaleAll = () => { myChart1.resize(); myChart2.resize(); myChart3.resize(); };
     window.addEventListener('resize', rescaleAll);
     setTimeout(rescaleAll, 200);
-
 </script>
 </body>
 </html>

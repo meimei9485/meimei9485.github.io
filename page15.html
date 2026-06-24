@@ -114,7 +114,7 @@
         .rank { font-size: 0.8cqw; font-weight: 800; color: white; padding: 0.1cqw 0.5cqw; border-radius: 0.2cqw; }
         .rank-1 { background: var(--rank1); } .rank-2 { background: var(--rank2); } .rank-3 { background: var(--rank3); }
         
-        .main-tag { font-size: 1.15cqw; font-weight: 800; color: var(--text-primary); } /* 字体放大 */
+        .main-tag { font-size: 1.15cqw; font-weight: 800; color: var(--text-primary); } 
         .cross-card .main-tag { color: var(--accent-purple); font-size: 1.2cqw;}
 
         .data-pct { font-size: 0.9cqw; font-weight: 800; color: var(--accent-blue); background: var(--accent-blue-light); padding: 0.2cqw 0.6cqw; border-radius: 1cqw; }
@@ -126,18 +126,18 @@
             border: 0.05cqw solid #e2e8f0; padding: 0.1cqw 0.4cqw; border-radius: 0.2cqw;
         }
 
-        /* 核心洞察区 (放大字号，减少留白) */
+        /* 核心洞察区 */
         .insight-box {
             flex: 0 0 auto;
-            font-size: 0.9cqw; /* 字体显著放大 */
+            font-size: 0.9cqw; 
             line-height: 1.5; color: var(--text-secondary);
             text-align: justify;
         }
         .insight-highlight { font-weight: 800; color: var(--text-primary); background: linear-gradient(120deg, rgba(139,92,246,0.15) 0%, rgba(14,165,233,0.15) 100%); padding: 0 0.2cqw; border-radius: 0.2cqw;}
 
-        /* 下方语录与图片拼图填满 (消除边缘白斑) */
+        /* 下方语录与图片拼图填满 */
         .card-footer {
-            flex: 1 1 0; /* 吸收一切底端剩余空间 */
+            flex: 1 1 0; 
             display: flex; gap: 1cqw; min-height: 0; align-items: stretch;
             margin-top: auto; 
         }
@@ -164,9 +164,37 @@
             display: flex; align-items: center; justify-content: center;
             padding: 0.5cqw; box-sizing: border-box; overflow: hidden; min-height: 0; min-width: 0;
         }
+        
+        /* ============== 本次要求修改点：鼠标悬停跳出式放大 ============== */
+        /* 1. 激活所有层级关联，防止图片跳出时被后续 DOM (如右侧列或底部卡片) 遮挡 */
+        .col-left, .col-right, .section, .card, .cross-card, .card-img-wrapper { 
+            position: relative; 
+        }
+        .col-left:hover, .col-right:hover, .section:hover, .card:hover, .cross-card:hover, .card-img-wrapper:hover { 
+            z-index: 99; 
+        }
+
         .card-img-wrapper img {
             max-width: 100%; max-height: 100%; object-fit: contain; display: block;
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); /* 添加弹簧式的回弹动效 */
+            position: relative;
         }
+        
+        /* 2. 关键：悬浮时取消 wrapper 的外框隐藏限制，允许图片突破束缚 */
+        .card-img-wrapper:hover {
+            overflow: visible; 
+        }
+        
+        /* 3. 本体放大：倍数激增至 2.8 倍，绝对出圈霸屏 */
+        .card-img-wrapper:hover img {
+            transform: scale(2.8); 
+            background: #ffffff; /* 如果原图透明，利用白底防止它跟后面的文字重叠走样 */
+            border-radius: 0.4cqw;
+            /* 利用多重阴影制造一张图片“飞”到你的屏幕前的超强隔离感 */
+            box-shadow: 0 0 0 0.05cqw var(--border-color), 0 2cqw 5cqw rgba(0,0,0,0.35); 
+            cursor: zoom-in;
+        }
+        /* ============================================================== */
 
         /* 交叉分析特写调整 */
         .cross-card { border-left: 0.4cqw solid var(--accent-purple); padding-left: 1cqw; }
