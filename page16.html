@@ -16,366 +16,577 @@
                             <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>透明度争议分析</title>
-  <style>
-    /* 全局格式与底层控制 */
-    * { 
-      margin: 0; padding: 0; box-sizing: border-box; 
-      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, Arial, sans-serif;
-    }
-    
-    body {
-      width: 100vw; height: 100vh;
-      background-color: #0F172A; 
-      display: flex; justify-content: center; align-items: center;
-      overflow: hidden; 
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>收纳需求深入分析</title>
+    <style>
+        /* ========================================================
+           0. 全局变量与核心重置
+        ======================================================== */
+        :root {
+            --bg-body: #EAECEF;
+            --bg-slide: #FFFFFF;
+            --brand-primary: #2C5282;
+            --brand-accent: #3182CE;
+            --brand-light: #EBF8FF;
+            --text-main: #1A202C;
+            --text-sub: #4A5568;
+            --text-muted: #718096;
+            --border-color: #E2E8F0;
+            --card-bg: #F8FAFC;
+        }
 
-    /* 空间刚性锁定：16:9 画布 */
-    .ppt-canvas {
-      background: #FFFFFF;
-      position: relative;
-      width: 100%; height: 100%;
-      max-width: calc(98vh * 16 / 9); 
-      max-height: calc(100vw * 9 / 16); 
-      aspect-ratio: 16 / 9;
-      
-      container-type: inline-size; 
-      container-name: ppt;
-      
-      border-radius: 0.8cqw;
-      box-shadow: 0 4cqw 10cqw rgba(0, 0, 0, 0.5), inset 0 0 0.1cqw rgba(255, 255, 255, 0.4);
-      display: flex; flex-direction: column;
-      overflow: hidden;
-      animation: revealCanvas 0.8s cubic-bezier(0.16, 1, 0.3, 1);
-    }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-font-smoothing: antialiased;
+        }
 
-    /* 顶部页眉区 */
-    .header {
-      display: flex; justify-content: space-between; align-items: flex-end;
-      padding: 1.8cqw 3cqw 1.2cqw;
-      border-bottom: 0.1cqw solid #E2E8F0;
-      background: #F8FAFC;
-    }
-    
-    .title-group { display: flex; align-items: baseline; gap: 1cqw; }
-    .title-group h1 { font-size: 2.2cqw; font-weight: 800; color: #0F172A; letter-spacing: -0.05cqw; }
-    .title-group .subtitle { font-size: 1cqw; color: #64748B; padding-left: 1cqw; border-left: 0.15cqw solid #CBD5E1; }
-    
-    .stats-group { display: flex; gap: 0.8cqw; }
-    .stat-pill { 
-      background: #FFFFFF; color: #334155; font-size: 0.8cqw; 
-      padding: 0.4cqw 1cqw; border-radius: 2cqw; font-weight: 600; 
-      border: 0.1cqw solid #CBD5E1; border-left: 0.3cqw solid #2563EB; box-shadow: 0 0.2cqw 0.5cqw rgba(0,0,0,0.02);
-    }
+        /* ========================================================
+           1. 空间与尺寸刚性控制（核心约束）
+        ======================================================== */
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100vw;
+            height: 100vh;
+            background-color: var(--bg-body);
+            overflow: hidden; 
+            font-family: "SF Pro Display", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
 
-    /* 核心区：双分栏对垒 (重塑为 3:2 比例) */
-    .main-body {
-      flex: 1; min-height: 0;
-      display: flex; gap: 2cqw;
-      padding: 1.5cqw 3cqw 2cqw;
-      background: #FFFFFF;
-    }
+        .ppt-container {
+            aspect-ratio: 16 / 9;
+            width: 100%;
+            max-width: 1600px;
+            max-height: 98vh; 
+            min-height: 0;
+            background: var(--bg-slide);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(0,0,0,0.02);
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden; 
+            padding: 2.2% 3%;
+            animation: fadeIn 0.8s ease-out;
+            position: relative; 
+        }
 
-    .left-section, .right-section { display: flex; flex-direction: column; gap: 1.2cqw; min-height: 0; }
-    
-    /* 需求4: 调整比例，左边约占 60% (3/5) 右边约40% (2/5) */
-    .left-section { width: 57%; }
-    .right-section { width: 43%; }
+        /* ========================================================
+           2. 极限平铺布局与排版
+        ======================================================== */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            padding-bottom: 1.5%;
+            border-bottom: 2px solid var(--border-color);
+            margin-bottom: 1.5%;
+            flex-shrink: 0;
+        }
 
-    .section-title {
-      font-size: 1.1cqw; font-weight: 700; color: #1E293B; display: flex; align-items: center; gap: 0.5cqw;
-    }
-    .section-title::before { content: ""; width: 0.4cqw; height: 1cqw; background: #2563EB; border-radius: 0.2cqw; }
+        header h1 {
+            font-size: min(2rem, 3.5vh);
+            color: var(--brand-primary);
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
 
-    /* ========== 左侧：偏好呈现卡片块 ========== */
-    .pref-cards-wrapper { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 0.8cqw; }
-    
-    .pref-card {
-      flex: 1; min-height: 0;
-      border: 0.1cqw solid #E2E8F0; border-radius: 0.6cqw;
-      display: flex; overflow: hidden; background: #FAFAFA;
-      animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
-    }
-    .pref-card:nth-child(1) { animation-delay: 0.1s; }
-    .pref-card:nth-child(2) { animation-delay: 0.2s; }
-    .pref-card:nth-child(3) { animation-delay: 0.3s; }
+        header .subtitle {
+            font-size: min(1.1rem, 2vh);
+            color: var(--text-muted);
+            font-weight: 500;
+        }
 
-    .pref-img {
-      width: 38%; /* 左侧空间扩大，图片本身占比可略微调优 */
-      background-size: cover; background-position: center;
-      position: relative;
-    }
-    .img-overlay-pct {
-      position: absolute; bottom: 0.5cqw; left: 0.5cqw;
-      background: rgba(15, 23, 42, 0.85); color: #FFF; font-size: 1.2cqw; font-weight: 800;
-      padding: 0.2cqw 0.6cqw; border-radius: 0.3cqw; backdrop-filter: blur(0.2cqw);
-    }
-    
-    .pref-content {
-      width: 62%; padding: 0.8cqw 1cqw 0.8cqw 1.8cqw;
-      display: flex; flex-direction: column; justify-content: center; gap: 0.5cqw;
-    }
-    .p-head { display: flex; align-items: baseline; gap: 0.5cqw; border-bottom: 0.1cqw dashed #CBD5E1; padding-bottom: 0.4cqw; margin-bottom: 0.2cqw;}
-    .p-title { font-size: 1cqw; font-weight: 800; color: #0F172A; }
-    .p-n { font-size: 0.75cqw; color: #64748B; font-weight: 600; }
-    
-    .p-logic-box { margin-bottom: 0.2cqw;}
-    .l-title { font-size: 0.8cqw; font-weight: 700; color: #2563EB; }
-    .l-desc { font-size: 0.8cqw; color: #475569; line-height: 1.4; margin-top: 0.2cqw; }
+        .main-content {
+            display: flex;
+            gap: 2%;
+            flex: 1; 
+            min-height: 0; 
+        }
 
+        .panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: var(--card-bg);
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            padding: 1.5% 2%;
+            overflow: hidden;
+            min-height: 0;
+        }
 
-    /* ========== 右侧：表格布局区 ========== */
-    .table-wrapper {
-      flex: 1; min-height: 0; display: flex; align-items: stretch;
-      animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) both; animation-delay: 0.4s;
-    }
+        .panel-title {
+            font-size: min(1.3rem, 2.5vh);
+            color: var(--text-main);
+            font-weight: 600;
+            margin-bottom: 3%;
+            display: flex;
+            align-items: center;
+            flex-shrink: 0;
+        }
 
-    table.strategy-table {
-      width: 100%; border-collapse: separate; border-spacing: 0; table-layout: fixed;
-      border: 0.1cqw solid #E2E8F0; border-radius: 0.6cqw; background: #FFFFFF;
-      box-shadow: 0 0.5cqw 1.5cqw rgba(0,0,0,0.02);
-    }
-    
-    .strategy-table th { 
-      background: #F8FAFC; color: #475569; font-size: 0.85cqw; font-weight: 700; 
-      padding: 0.8cqw; text-align: left; border-bottom: 0.1cqw solid #E2E8F0;
-    }
-    
-    .strategy-table td { 
-      padding: 1cqw 0.8cqw; font-size: 0.8cqw; line-height: 1.5; color: #334155; 
-      border-bottom: 0.1cqw solid #F1F5F9; vertical-align: top;
-    }
-    .strategy-table tr:last-child td { border-bottom: none; }
+        .panel-title::before {
+            content: '';
+            display: inline-block;
+            width: 4px;
+            height: 18px;
+            background: var(--brand-accent);
+            margin-right: 10px;
+            border-radius: 2px;
+        }
 
-    /* 重设字段占比：适配右侧变窄的情况 */
-    .col-mat { width: 17%; text-align: center; }
-    .col-strat { width: 16%; font-weight: 600; color: #0F172A; }
-    .col-adv { width: 34%; }
-    .col-dis { width: 33%; }
+        .data-list {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            min-height: 0;
+            margin-bottom: 3%;
+        }
 
-    /* 材质标签样式 */
-    .mat-tag { 
-      display: inline-block; padding: 0.3cqw 0.6cqw; border-radius: 0.4cqw; 
-      font-weight: 800; font-size: 0.75cqw; line-height: 1.3;
-    }
-    .tag-blue { background: #EFF6FF; color: #2563EB; }
-    .tag-orange { background: #FFF7ED; color: #EA580C; }
+        .data-item {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            position: relative;
+            animation: slideInLeft 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
+        }
 
-    .pct-tag { font-size: 0.7cqw; color: #64748B; font-weight: 800; display: block; margin-top: 0.3cqw; }
-    
-    /* 强调用语 */
-    .bold-txt { font-weight: 800; color: #0F172A; }
+        .panel:nth-child(1) .data-item:nth-child(1) { animation-delay: 0.1s; }
+        .panel:nth-child(1) .data-item:nth-child(2) { animation-delay: 0.2s; }
+        .panel:nth-child(1) .data-item:nth-child(3) { animation-delay: 0.3s; }
+        .panel:nth-child(1) .data-item:nth-child(4) { animation-delay: 0.4s; }
+        .panel:nth-child(1) .data-item:nth-child(5) { animation-delay: 0.5s; }
+        .panel:nth-child(1) .data-item:nth-child(6) { animation-delay: 0.6s; }
+        .panel:nth-child(2) .data-item:nth-child(1) { animation-delay: 0.2s; }
+        .panel:nth-child(2) .data-item:nth-child(2) { animation-delay: 0.3s; }
+        .panel:nth-child(2) .data-item:nth-child(3) { animation-delay: 0.4s; }
+        .panel:nth-child(2) .data-item:nth-child(4) { animation-delay: 0.5s; }
+        .panel:nth-child(2) .data-item:nth-child(5) { animation-delay: 0.6s; }
 
+        .item-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 4px;
+        }
 
-    /* ========== 结论输出层 ========== */
-    .conclusion-row { margin-top: auto; }
-    
-    .conclusion-box {
-      border: 0.1cqw solid #E2E8F0; padding: 1cqw 1.2cqw; border-radius: 0.6cqw;
-      display: flex; flex-direction: column; gap: 0.4cqw;
-      animation: slideUp 0.8s ease 0.6s both;
-    }
-    
-    /* 左偏好结论配色 */
-    .c-primary { background: #EFF6FF; border-left: 0.5cqw solid #2563EB; border-color: #BFDBFE; }
-    .c-primary .concl-tag { color: #1D4ED8; }
-    
-    /* 右定案结论配色 */
-    .c-secondary { background: #F8FAFC; border-left: 0.5cqw solid #0F172A; border-color: #E2E8F0; }
-    .c-secondary .concl-tag { color: #0F172A; }
+        .rank {
+            width: 24px;
+            height: 24px;
+            background: var(--text-muted); 
+            color: #fff;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.85rem;
+            font-weight: bold;
+            margin-right: 12px;
+        }
 
-    .concl-tag { font-size: 0.75cqw; font-weight: 800; text-transform: uppercase; }
-    .concl-text { font-size: 0.9cqw; color: #1E293B; line-height: 1.6; font-weight: 500;}
-    .concl-text strong { font-weight: 800; color: #0F172A; }
-    
-    /* 针对要求2的陈列换行排版项 */
-    .point-item { display:flex; align-items:baseline; margin-bottom: 0.4cqw; }
-    .point-item:last-child { margin-bottom: 0; }
-    
-    /* 专有蓝字高亮 (左侧结论用)*/
-    .t-blue { color: #2563EB !important; }
+        .tag-name {
+            font-size: min(1.05rem, 2vh);
+            font-weight: 600;
+            color: var(--text-main);
+            width: 140px;
+            flex-shrink: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
 
-    /* 动画 */
-    @keyframes revealCanvas { 0% { opacity: 0; transform: scale(0.98); } 100% { opacity: 1; transform: scale(1); } }
-    @keyframes slideUp { 0% { opacity: 0; transform: translateY(2cqw); } 100% { opacity: 1; transform: translateY(0); } }
-  </style>
+        .bar-container {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .bar-track {
+            flex: 1;
+            height: 8px;
+            background: #EDF2F7;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--brand-primary), var(--brand-accent));
+            border-radius: 4px;
+            transform-origin: left;
+            animation: scaleX 1s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+        }
+
+        .stat-text {
+            font-size: min(0.9rem, 1.8vh);
+            color: var(--brand-primary);
+            font-weight: 700;
+            width: 45px;
+            text-align: right;
+            flex-shrink: 0;
+        }
+
+        .sample-review {
+            font-size: min(0.85rem, 1.6vh);
+            color: var(--text-sub);
+            padding-left: 36px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            font-style: italic;
+        }
+
+        .conclusion {
+            background: var(--brand-light);
+            border-left: 4px solid var(--brand-accent);
+            padding: 2% 2.5%;
+            border-radius: 0 6px 6px 0;
+            flex-shrink: 0;
+            font-size: min(0.95rem, 1.8vh);
+            line-height: 1.5;
+            color: var(--brand-primary);
+        }
+
+        .conclusion strong {
+            font-weight: 700;
+            margin-right: 5px;
+        }
+
+        /* ========================================================
+           3. 图片交互画廊系统（悬浮跳出式放大）
+        ======================================================== */
+        .image-gallery {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+            height: clamp(80px, 11vh, 160px); 
+            width: 100%;
+        }
+
+        .img-card {
+            flex: 1;
+            position: relative;
+            border-radius: 6px;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+            background: #fff;
+            cursor: zoom-in;
+        }
+
+        .img-card > img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: filter 0.3s;
+        }
+
+        .img-card:hover > img {
+            filter: brightness(0.8);
+        }
+
+        .img-label {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: rgba(26, 32, 44, 0.75);
+            color: white;
+            font-size: min(0.7rem, 1.4vh);
+            text-align: center;
+            padding: 4px 0;
+            backdrop-filter: blur(2px);
+            pointer-events: none;
+        }
+
+        .hover-popout {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.9);
+            z-index: 10000;
+            opacity: 0;
+            pointer-events: none; 
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+            background: #fff;
+            padding: 12px;
+            border-radius: 8px;
+            box-shadow: 0 0 0 4000px rgba(15, 23, 42, 0.8), 0 20px 40px rgba(0,0,0,0.5);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .img-card:hover .hover-popout {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        .hover-popout img {
+            width: auto;
+            height: auto;
+            max-width: 55vw;
+            max-height: 55vh; 
+            object-fit: contain;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+        }
+
+        .popout-title {
+            margin-top: 10px;
+            font-size: min(1.1rem, 2.2vh);
+            color: var(--text-main);
+            font-weight: 600;
+        }
+
+        .popout-sub {
+            font-size: min(0.9rem, 1.8vh);
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        /* ========================================================
+           4. 动态 Keyframes
+        ======================================================== */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.98); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        @keyframes slideInLeft {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        @keyframes scaleX {
+            from { transform: scaleX(0); }
+            to { transform: scaleX(1); }
+        }
+    </style>
 </head>
 <body>
 
-  <div class="ppt-canvas">
-    
-    <!-- 全局页眉 -->
-    <header class="header">
-      <div class="title-group">
-        <h1>透明度争议分析</h1>
-        <div class="subtitle">偏好数据验证分析与离型材质产品战略定案</div>
-      </div>
-      <div class="stats-group">
-        <div class="stat-pill">有效样本 N = 77</div>
-        <div class="stat-pill">总占比 N = 1,038</div>
-      </div>
-    </header>
-
-    <main class="main-body">
-      
-      <!-- ============ 左侧半场：偏好验证 (扩大空间至占比近 ~60%) ============ -->
-      <section class="left-section">
-        <div class="section-title">01 / 离型透明度偏好对比</div>
-        
-        <div class="pref-cards-wrapper">
-          <!-- 全透明 -->
-          <div class="pref-card">
-            <div class="pref-img" style="background-image: url('https://wp-cdn.4ce.cn/v2/dy1Dgey.png');">
-              <div class="img-overlay-pct">59.74%</div>
+    <div class="ppt-container">
+        <!-- 头部模块 -->
+        <header>
+            <div>
+                <h1>收纳需求深入分析</h1>
+                <div class="subtitle">Data Insight: Product Purchase Motivation & Usage Scenarios</div>
             </div>
-            <div class="pref-content">
-              <div class="p-head">
-                <span class="p-title">全透明 / 高清</span> <span class="p-n">(N=46)</span>
-              </div>
-              <div class="p-logic-box">
-                <div class="l-title">行为逻辑 - 透视预判</div>
-                <div class="l-desc">揭膜前识别色块与碎钻区；支持“循迹规划”进行跨区颜色追踪。</div>
-              </div>
-              <div class="p-logic-box">
-                <div class="l-title" style="color: #64748B;">心理动机 - 效能掌控</div>
-                <div class="l-desc">消除信息不对称，进行精准时间预算。</div>
-              </div>
+            <div class="subtitle" style="text-align: right;">
+                N=52 样本数据分析<br>以需求刚性驱动产品优化
             </div>
-          </div>
+        </header>
 
-          <!-- 半透明 (需求1：调换了半透与纯白的配图背景) -->
-          <div class="pref-card">
-            <div class="pref-img" style="background-image: url('https://wp-cdn.4ce.cn/v2/d5TdC0G.png');">
-              <div class="img-overlay-pct" style="font-size: 1.1cqw; background: rgba(234, 88, 12, 0.85); color: #fff;">15.58%</div>
-            </div>
-            <div class="pref-content">
-              <div class="p-head">
-                <span class="p-title">半透明 / 磨砂</span> <span class="p-n">(N=12)</span>
-              </div>
-              <div class="p-logic-box">
-                <div class="l-title">行为逻辑 - 光控显影</div>
-                <div class="l-desc">常光下屏蔽噪音，开启拷贝台时透出符号；减少塑料反光带来的视觉疲劳。</div>
-              </div>
-              <div class="p-logic-box">
-                <div class="l-title" style="color: #64748B;">心理动机 - 感官平衡</div>
-                <div class="l-desc">在导航便利与心理减压之间寻找折中点。</div>
-              </div>
-            </div>
-          </div>
+        <!-- 主体数据骨架 -->
+        <main class="main-content">
+            
+            <!-- 【左半版：购买动机】 -->
+            <section class="panel">
+                <div class="panel-title">01 / 购买动机</div>
+                <div class="data-list">
+                    <!-- Item 1：红色 -->
+                    <div class="data-item">
+                        <div class="item-header">
+                            <div class="rank" style="background: #E53E3E;">1</div>
+                            <div class="tag-name">整理/收纳离型纸</div>
+                            <div class="bar-container">
+                                <div class="bar-track"><div class="bar-fill" style="width: 90.2%;"></div></div>
+                                <div class="stat-text">41%</div>
+                            </div>
+                        </div>
+                        <div class="sample-review">"Exactly what I needed to hold release papers!"  (提及: 16次)</div>
+                    </div>
+                    <!-- Item 2：默认灰色 -->
+                    <div class="data-item">
+                        <div class="item-header">
+                            <div class="rank">2</div>
+                            <div class="tag-name">复购或收集系列</div>
+                            <div class="bar-container">
+                                <div class="bar-track"><div class="bar-fill" style="width: 45.1%; background: linear-gradient(90deg, #4A5568, #A0AEC0);"></div></div>
+                                <div class="stat-text">20%</div>
+                            </div>
+                        </div>
+                        <div class="sample-review">"I am a repeat customer due to her excellent product..." (提及: 8次)</div>
+                    </div>
+                    <!-- Item 3：默认灰色 -->
+                    <div class="data-item">
+                        <div class="item-header">
+                            <div class="rank">3</div>
+                            <div class="tag-name">美化桌面/搭配色系</div>
+                            <div class="bar-container">
+                                <div class="bar-track"><div class="bar-fill" style="width: 39.4%; background: linear-gradient(90deg, #4A5568, #A0AEC0);"></div></div>
+                                <div class="stat-text">17%</div>
+                            </div>
+                        </div>
+                        <div class="sample-review">"I love how cute this is!! It matches my diamond tray." (提及: 7次)</div>
+                    </div>
+                    <!-- Item 4：橙色 -->
+                    <div class="data-item">
+                        <div class="item-header">
+                            <div class="rank" style="background: #DD6B20;">4</div>
+                            <div class="tag-name">寻找多功能收纳法</div>
+                            <div class="bar-container">
+                                <div class="bar-track"><div class="bar-fill" style="width: 28.2%; background: linear-gradient(90deg, #A0AEC0, #CBD5E0);"></div></div>
+                                <div class="stat-text">12%</div>
+                            </div>
+                        </div>
+                        <div class="sample-review">"Cute box that can hold a variety of items" (提及: 5次)</div>
+                    </div>
+                    <!-- Item 5：土黄色 -->
+                    <div class="data-item">
+                        <div class="item-header">
+                            <div class="rank" style="background: #D69E2E;">5</div>
+                            <div class="tag-name">分类存放（抗混淆）</div>
+                            <div class="bar-container">
+                                <div class="bar-track"><div class="bar-fill" style="width: 11.2%; background: linear-gradient(90deg, #A0AEC0, #CBD5E0);"></div></div>
+                                <div class="stat-text">5%</div>
+                            </div>
+                        </div>
+                        <div class="sample-review">"I bought the small box to hold the small release sheets..." (提及: 2次)</div>
+                    </div>
+                    <!-- Item 6：默认灰色 -->
+                    <div class="data-item">
+                        <div class="item-header">
+                            <div class="rank">6</div>
+                            <div class="tag-name">沟通定制需求</div>
+                            <div class="bar-container">
+                                <div class="bar-track"><div class="bar-fill" style="width: 5.6%; background: linear-gradient(90deg, #A0AEC0, #CBD5E0);"></div></div>
+                                <div class="stat-text">2%</div>
+                            </div>
+                        </div>
+                        <div class="sample-review">"Tarie made it after we discussed what I was looking for." (提及: 1次)</div>
+                    </div>
+                </div>
+                <div class="conclusion">
+                    <strong>关键购买动机洞察：</strong>解决手工过程中散乱零碎的<strong>收纳痛点</strong>，产品强挂钩“高效理线分类工具”刚性价值。
+                </div>
+            </section>
 
-          <!-- 纯白 (需求1：调换了半透与纯白的配图背景) -->
-          <div class="pref-card">
-            <div class="pref-img" style="background-image: url('https://wp-cdn.4ce.cn/v2/bC9utjf.png');">
-              <div class="img-overlay-pct" style="font-size: 1.1cqw; background: rgba(71, 85, 105, 0.85); color: #fff;">24.68%</div>
-            </div>
-            <div class="pref-content">
-              <div class="p-head">
-                <span class="p-title">不透明 / 纯白</span> <span class="p-n">(N=19)</span>
-              </div>
-              <div class="p-logic-box">
-                <div class="l-title">行为逻辑 - 视觉清屏</div>
-                <div class="l-desc">彻底遮盖未完成符号，通过物理屏蔽缓解焦虑；利用白纸与画布建立强对比。</div>
-              </div>
-              <div class="p-logic-box">
-                <div class="l-title" style="color: #64748B;">心理动机 - 心理避风港</div>
-                <div class="l-desc">缓解“被淹没感 (Overwhelmed)”，提供即时成就感。</div>
-              </div>
-            </div>
-          </div>
-        </div>
+            <!-- 【右半版：使用用途】 -->
+            <section class="panel">
+                <div class="panel-title">02 / 使用用途</div>
+                <div class="data-list">
+                    <!-- Item 1 -->
+                    <div class="data-item">
+                        <div class="item-header">
+                            <div class="rank" style="background: #E53E3E;">1</div>
+                            <div class="tag-name">存放常规离型纸</div>
+                            <div class="bar-container">
+                                <div class="bar-track"><div class="bar-fill" style="width: 73.08%;"></div></div>
+                                <div class="stat-text">73%</div>
+                            </div>
+                        </div>
+                        <div class="sample-review">"This box nicely holds all of my release papers..." (提及: 19次)</div>
+                    </div>
+                    <!-- Item 2 -->
+                    <div class="data-item">
+                        <div class="item-header">
+                            <div class="rank" style="background:#4A5568">2</div>
+                            <div class="tag-name">存放作业蜡/胶泥</div>
+                            <div class="bar-container">
+                                <div class="bar-track"><div class="bar-fill" style="width: 7.69%; background: linear-gradient(90deg, #718096, #CBD5E0);"></div></div>
+                                <div class="stat-text">7%</div>
+                            </div>
+                        </div>
+                        <div class="sample-review">"Works great! I use mine for a cute little storage for my putty!" (提及: 2次)</div>
+                    </div>
+                    <!-- Item 3 -->
+                    <div class="data-item">
+                        <div class="item-header">
+                            <div class="rank" style="background:#4A5568">3</div>
+                            <div class="tag-name">存放零碎小饰物</div>
+                            <div class="bar-container">
+                                <div class="bar-track"><div class="bar-fill" style="width: 7.69%; background: linear-gradient(90deg, #718096, #CBD5E0);"></div></div>
+                                <div class="stat-text">7%</div>
+                            </div>
+                        </div>
+                        <div class="sample-review">"Perfect size for small release papers or trinkets." (提及: 2次)</div>
+                    </div>
+                    <!-- Item 4 -->
+                    <div class="data-item">
+                        <div class="item-header">
+                            <div class="rank" style="background:#A0AEC0">4</div>
+                            <div class="tag-name">预备收纳等待开箱</div>
+                            <div class="bar-container">
+                                <div class="bar-track"><div class="bar-fill" style="width: 7.69%; background: linear-gradient(90deg, #A0AEC0, #E2E8F0);"></div></div>
+                                <div class="stat-text">7%</div>
+                            </div>
+                        </div>
+                        <div class="sample-review">"Can’t wait to store my release papers inside!" (提及: 2次)</div>
+                    </div>
+                    <!-- Item 5 -->
+                    <div class="data-item">
+                        <div class="item-header">
+                            <div class="rank" style="background:#A0AEC0">5</div>
+                            <div class="tag-name">系列艺术品摆设</div>
+                            <div class="bar-container">
+                                <div class="bar-track"><div class="bar-fill" style="width: 3.85%; background: linear-gradient(90deg, #A0AEC0, #E2E8F0);"></div></div>
+                                <div class="stat-text">3%</div>
+                            </div>
+                        </div>
+                        <div class="sample-review">"I have been collecting one of each from this business..." (提及: 1次)</div>
+                    </div>
+                </div>
 
-        <!-- 需求2：文案更新 -->
-        <div class="conclusion-row">
-          <div class="conclusion-box c-primary">
-            <div class="concl-tag">Part 1 - 偏好确认关键结论</div>
-            <div class="concl-text">
-              <strong>75.42%</strong> 的用户要求具备透明度（全透<span class="t-blue">59.74%</span>+半透<span class="t-blue">15.58%</span>），以实现数据的<strong>“预读”</strong>功能，符号可视需求偏向明显。
-            </div>
-          </div>
-        </div>
-      </section>
+                <!-- 拆分：使用偏好归类洞察 (并入使用用途分析) -->
+                <div class="conclusion" style="margin-bottom: 1.5%;">
+                    <strong>关键洞察：</strong>在实际使用中，超 70% 的用户严格将其作为离型纸的专属收纳。
+                </div>
 
-      <!-- ============ 右侧半场：对比与定夺 (=占40%) ============ -->
-      <section class="right-section">
-        <div class="section-title">02 / 全透明/半透明方案优劣势对比</div>
-        
-        <div class="table-wrapper">
-          <!-- 需求3：表格内容原封不动精准还原 -->
-          <table class="strategy-table">
-            <thead>
-              <tr>
-                <th class="col-mat">推演材质</th>
-                <th class="col-strat">产品策略</th>
-                <th class="col-adv">优点</th>
-                <th class="col-dis">劣势</th>
-              </tr>
-            </thead>
-            <tbody>
-              <!-- 全透明原文对比 -->
-              <tr>
-                <td class="col-mat">
-                  <span class="mat-tag tag-blue">全透明 / 高清</span>
-                  <span style="font-size: 0.6cqw; color: #64748B; display: block;">(HD Clear)</span>
-                </td>
-                <td class="col-strat">
-                  专业效能管理系统
-                  <span class="pct-tag">占比：59.74%</span>
-                </td>
-                <td>
-                  <span class="bold-txt">极致效率：</span>支持“循迹切割”与“精准预判”。玩家可绕过格子，按图案边缘不规则剪裁以处理同色块。
-                </td>
-                <td>
-                  由于太透导致“边缘消失”，易点错位置（边框设计可解决）；强光下存在眩光干扰。
-                </td>
-              </tr>
-              <!-- 半透明原文对比 -->
-              <tr>
-                <td class="col-mat">
-                  <span class="mat-tag tag-orange">半透明 / 磨砂</span>
-                  <span style="font-size: 0.6cqw; color: #64748B; display: block;">(Translucent)</span>
-                </td>
-                <td class="col-strat">
-                  极致心流与护眼
-                  <span class="pct-tag">占比：15.58%</span>
-                </td>
-                <td>
-                  自带物理边界感，光线柔和，减少视觉噪音。
-                </td>
-                <td>
-                  <span class="bold-txt">效能损耗：</span>识别效率低，将产品降级为“盲盒模式”。微小符号在半透下会产生“虚化”，剥夺了玩家在揭膜前的预判权。
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        <!-- 需求2：文案更新与强制换行陈列排版 -->
-        <div class="conclusion-row">
-          <div class="conclusion-box c-secondary">
-            <div class="concl-tag">Part 2 - 最终产品线定夺结论</div>
-            <div class="concl-text">
-              
-              <!-- 阵列排版 1 -->
-              <div class="point-item">
-                <div><strong>全透明视窗提供“高清地图”：</strong>59.74% 的高阶用户选择全透，是因为其“导航价值”远超半透的“减压价值”，离型膜产品定位是专业效能提升工具。</div>
-              </div>
-              
-              <!-- 阵列排版 2 -->
-              <div class="point-item">
-                <div><strong>AR 抗眩光：</strong>采用 AR 涂层解决全透明方案强光反射对眼脑的困扰。</div>
-              </div>
-              
-            </div>
-          </div>
-        </div>
-
-      </section>
-
-    </main>
-  </div>
+                <!-- 拆分：痛点还原场景盒 -->
+                <div class="conclusion" style="border-left-color: #E53E3E; background: #FFF5F5;">
+                    <div><strong>实景场景痛点追踪：</strong>无处放置的散落与简陋自备袋引发的桌搭焦虑。</div>
+                    
+                    <div class="image-gallery">
+                        <!-- 图1 -->
+                        <div class="img-card">
+                            <img src="https://wp-cdn.4ce.cn/v2/n9x9uDH.png" alt="散落摆放">
+                            <div class="img-label">散落 - 无处放置</div>
+                            <div class="hover-popout">
+                                <img src="https://wp-cdn.4ce.cn/v2/n9x9uDH.png" alt="散落详情">
+                                <div class="popout-title">场景还原：散落情况</div>
+                                <div class="popout-sub">随意堆放影响桌面整洁度</div>
+                            </div>
+                        </div>
+                        <!-- 图2 (彻底移除了红线圈) -->
+                        <div class="img-card">
+                            <img src="https://wp-cdn.4ce.cn/v2/RcfcmzI.png" alt="无处放置">
+                            <div class="img-label">散落 - 无处放置</div>
+                            <div class="hover-popout">
+                                <img src="https://wp-cdn.4ce.cn/v2/RcfcmzI.png" alt="散落详情">
+                                <div class="popout-title">场景还原：桌面凌乱</div>
+                                <div class="popout-sub">易导致工具混淆遗失</div>
+                            </div>
+                        </div>
+                        <!-- 图3 -->
+                        <div class="img-card">
+                            <img src="https://wp-cdn.4ce.cn/v2/K5FhZrI.png" alt="无处放置">
+                            <div class="img-label">散落 - 无处放置</div>
+                            <div class="hover-popout">
+                                <img src="https://wp-cdn.4ce.cn/v2/K5FhZrI.png" alt="散落详情">
+                                <div class="popout-title">场景还原：无序堆砌</div>
+                                <div class="popout-sub">影响手工作业的情绪体验</div>
+                            </div>
+                        </div>
+                        <!-- 图4 -->
+                        <div class="img-card">
+                            <img src="https://wp-cdn.4ce.cn/v2/8HQ5oeA.png" alt="自配收纳袋">
+                            <div class="img-label">简陋 - 自配密封袋</div>
+                            <div class="hover-popout">
+                                <img src="https://wp-cdn.4ce.cn/v2/8HQ5oeA.png" alt="简陋详情">
+                                <div class="popout-title">场景还原：简陋收纳</div>
+                                <div class="popout-sub">透明自封塑料袋缺乏桌搭美感</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+            </section>
+        </main>
+    </div>
 
 </body>
 </html>

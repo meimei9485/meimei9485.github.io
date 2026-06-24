@@ -16,302 +16,366 @@
                             <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>离型纸产品路线图谱</title>
-    <style>
-        /* ================= 基础重置 ================= */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>透明度争议分析</title>
+  <style>
+    /* 全局格式与底层控制 */
+    * { 
+      margin: 0; padding: 0; box-sizing: border-box; 
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, Arial, sans-serif;
+    }
+    
+    body {
+      width: 100vw; height: 100vh;
+      background-color: #0F172A; 
+      display: flex; justify-content: center; align-items: center;
+      overflow: hidden; 
+    }
 
-        body {
-            width: 100vw;
-            height: 100vh;
-            background: #eef1f5;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            overflow: hidden;
-        }
+    /* 空间刚性锁定：16:9 画布 */
+    .ppt-canvas {
+      background: #FFFFFF;
+      position: relative;
+      width: 100%; height: 100%;
+      max-width: calc(98vh * 16 / 9); 
+      max-height: calc(100vw * 9 / 16); 
+      aspect-ratio: 16 / 9;
+      
+      container-type: inline-size; 
+      container-name: ppt;
+      
+      border-radius: 0.8cqw;
+      box-shadow: 0 4cqw 10cqw rgba(0, 0, 0, 0.5), inset 0 0 0.1cqw rgba(255, 255, 255, 0.4);
+      display: flex; flex-direction: column;
+      overflow: hidden;
+      animation: revealCanvas 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    }
 
-        /* ================= 16:9 画布刚性控制 ================= */
-        .ppt-wrapper {
-            position: relative;
-            width: 100%;
-            max-width: 1600px;
-            aspect-ratio: 16 / 9;
-            max-height: 98vh;
-            min-height: 0;
-            background: #ffffff;
-            border-radius: 12px;
-            box-shadow: 0 24px 64px -16px rgba(0, 30, 50, 0.12);
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            padding: clamp(20px, 3.5%, 48px) clamp(24px, 4%, 56px);
-            animation: slideIn 0.8s cubic-bezier(0.16, 1, 0.3, 1);
-        }
+    /* 顶部页眉区 */
+    .header {
+      display: flex; justify-content: space-between; align-items: flex-end;
+      padding: 1.8cqw 3cqw 1.2cqw;
+      border-bottom: 0.1cqw solid #E2E8F0;
+      background: #F8FAFC;
+    }
+    
+    .title-group { display: flex; align-items: baseline; gap: 1cqw; }
+    .title-group h1 { font-size: 2.2cqw; font-weight: 800; color: #0F172A; letter-spacing: -0.05cqw; }
+    .title-group .subtitle { font-size: 1cqw; color: #64748B; padding-left: 1cqw; border-left: 0.15cqw solid #CBD5E1; }
+    
+    .stats-group { display: flex; gap: 0.8cqw; }
+    .stat-pill { 
+      background: #FFFFFF; color: #334155; font-size: 0.8cqw; 
+      padding: 0.4cqw 1cqw; border-radius: 2cqw; font-weight: 600; 
+      border: 0.1cqw solid #CBD5E1; border-left: 0.3cqw solid #2563EB; box-shadow: 0 0.2cqw 0.5cqw rgba(0,0,0,0.02);
+    }
 
-        /* ================= 头部区 ================= */
-        header {
-            display: flex;
-            flex-direction: column;
-            margin-bottom: clamp(16px, 3vh, 32px);
-            border-bottom: 2px solid #f0f2f5;
-            padding-bottom: clamp(12px, 2vh, 24px);
-            flex-shrink: 0;
-            position: relative;
-            z-index: 10;
-        }
+    /* 核心区：双分栏对垒 (重塑为 3:2 比例) */
+    .main-body {
+      flex: 1; min-height: 0;
+      display: flex; gap: 2cqw;
+      padding: 1.5cqw 3cqw 2cqw;
+      background: #FFFFFF;
+    }
 
-        header h1 {
-            font-size: clamp(26px, 2.8vw, 42px);
-            color: #0f172a;
-            font-weight: 800;
-            letter-spacing: 2px;
-            margin-bottom: 4px;
-        }
+    .left-section, .right-section { display: flex; flex-direction: column; gap: 1.2cqw; min-height: 0; }
+    
+    /* 需求4: 调整比例，左边约占 60% (3/5) 右边约40% (2/5) */
+    .left-section { width: 57%; }
+    .right-section { width: 43%; }
 
-        header .subtitle {
-            font-size: clamp(12px, 1.1vw, 16px);
-            color: #64748b;
-            font-weight: 600;
-            letter-spacing: 4px;
-            text-transform: uppercase;
-        }
+    .section-title {
+      font-size: 1.1cqw; font-weight: 700; color: #1E293B; display: flex; align-items: center; gap: 0.5cqw;
+    }
+    .section-title::before { content: ""; width: 0.4cqw; height: 1cqw; background: #2563EB; border-radius: 0.2cqw; }
 
-        /* ================= 内容网格化布局 ================= */
-        .content-grid {
-            flex: 1;
-            min-height: 0;
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: clamp(16px, 2vw, 32px);
-            position: relative;
-            z-index: 10;
-        }
+    /* ========== 左侧：偏好呈现卡片块 ========== */
+    .pref-cards-wrapper { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 0.8cqw; }
+    
+    .pref-card {
+      flex: 1; min-height: 0;
+      border: 0.1cqw solid #E2E8F0; border-radius: 0.6cqw;
+      display: flex; overflow: hidden; background: #FAFAFA;
+      animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+    .pref-card:nth-child(1) { animation-delay: 0.1s; }
+    .pref-card:nth-child(2) { animation-delay: 0.2s; }
+    .pref-card:nth-child(3) { animation-delay: 0.3s; }
 
-        /* ------ 卡片基础构造 ------ */
-        .card {
-            background: #f8fafc;
-            border: 1px solid #e2e8f0;
-            border-radius: 12px;
-            display: flex;
-            flex-direction: column;
-            padding: clamp(20px, 2.5vw, 32px);
-            transition: transform 0.4s ease, box-shadow 0.4s ease;
-            position: relative;
-            overflow: hidden;
-        }
+    .pref-img {
+      width: 38%; /* 左侧空间扩大，图片本身占比可略微调优 */
+      background-size: cover; background-position: center;
+      position: relative;
+    }
+    .img-overlay-pct {
+      position: absolute; bottom: 0.5cqw; left: 0.5cqw;
+      background: rgba(15, 23, 42, 0.85); color: #FFF; font-size: 1.2cqw; font-weight: 800;
+      padding: 0.2cqw 0.6cqw; border-radius: 0.3cqw; backdrop-filter: blur(0.2cqw);
+    }
+    
+    .pref-content {
+      width: 62%; padding: 0.8cqw 1cqw 0.8cqw 1.8cqw;
+      display: flex; flex-direction: column; justify-content: center; gap: 0.5cqw;
+    }
+    .p-head { display: flex; align-items: baseline; gap: 0.5cqw; border-bottom: 0.1cqw dashed #CBD5E1; padding-bottom: 0.4cqw; margin-bottom: 0.2cqw;}
+    .p-title { font-size: 1cqw; font-weight: 800; color: #0F172A; }
+    .p-n { font-size: 0.75cqw; color: #64748B; font-weight: 600; }
+    
+    .p-logic-box { margin-bottom: 0.2cqw;}
+    .l-title { font-size: 0.8cqw; font-weight: 700; color: #2563EB; }
+    .l-desc { font-size: 0.8cqw; color: #475569; line-height: 1.4; margin-top: 0.2cqw; }
 
-        .card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 12px 32px -12px rgba(0, 0, 0, 0.1);
-        }
 
-        /* 后景装饰水印字 */
-        .card::after {
-            content: attr(data-watermark);
-            position: absolute;
-            bottom: -5%;
-            right: 2%;
-            font-size: clamp(80px, 8vw, 140px);
-            font-weight: 900;
-            color: #0f172a;
-            opacity: 0.03;
-            pointer-events: none;
-            letter-spacing: -2px;
-            z-index: 0;
-        }
+    /* ========== 右侧：表格布局区 ========== */
+    .table-wrapper {
+      flex: 1; min-height: 0; display: flex; align-items: stretch;
+      animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) both; animation-delay: 0.4s;
+    }
 
-        /* ------ 核心修改：晨曦浅黄共享底纹 (RPA7 & 离型膜 共用) ------ */
-        .theme-yellow {
-            background: linear-gradient(180deg, #fffef8 0%, #fcf7e3 100%);
-            border: 1px solid #f4ebd0;
-        }
-        
-        .theme-yellow::after { color: #d1b466; opacity: 0.05; }
-        .theme-yellow .card-title { color: #3a3219; }
-        .theme-yellow .price-tag { color: #9c7b24; }
-        
-        .theme-yellow .feature-item {
-            background: rgba(255, 255, 255, 0.75);
-            border-color: rgba(244, 235, 208, 0.8);
-            border-left: 4px solid #e5cc8f;
-        }
+    table.strategy-table {
+      width: 100%; border-collapse: separate; border-spacing: 0; table-layout: fixed;
+      border: 0.1cqw solid #E2E8F0; border-radius: 0.6cqw; background: #FFFFFF;
+      box-shadow: 0 0.5cqw 1.5cqw rgba(0,0,0,0.02);
+    }
+    
+    .strategy-table th { 
+      background: #F8FAFC; color: #475569; font-size: 0.85cqw; font-weight: 700; 
+      padding: 0.8cqw; text-align: left; border-bottom: 0.1cqw solid #E2E8F0;
+    }
+    
+    .strategy-table td { 
+      padding: 1cqw 0.8cqw; font-size: 0.8cqw; line-height: 1.5; color: #334155; 
+      border-bottom: 0.1cqw solid #F1F5F9; vertical-align: top;
+    }
+    .strategy-table tr:last-child td { border-bottom: none; }
 
-        /* ------ 高端款专属标识 (同为浅黄底色，通过压金边划清等级界限) ------ */
-        .theme-yellow.premium-accent::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; right: 0;
-            height: 4px;
-            background: linear-gradient(90deg, #d4af37, #f3e5c9);
-            z-index: 2;
-        }
-        .theme-yellow.premium-accent .feature-item {
-            border-left: 4px solid #d4af37; /* 加强金线，彰显Pro感 */
-        }
-        .theme-yellow.premium-accent::after { color: #d4af37; opacity: 0.07; }
+    /* 重设字段占比：适配右侧变窄的情况 */
+    .col-mat { width: 17%; text-align: center; }
+    .col-strat { width: 16%; font-weight: 600; color: #0F172A; }
+    .col-adv { width: 34%; }
+    .col-dis { width: 33%; }
 
-        /* ------ 顶部信息区 ------ */
-        .card-header {
-            position: relative;
-            z-index: 1;
-            flex-shrink: 0;
-        }
+    /* 材质标签样式 */
+    .mat-tag { 
+      display: inline-block; padding: 0.3cqw 0.6cqw; border-radius: 0.4cqw; 
+      font-weight: 800; font-size: 0.75cqw; line-height: 1.3;
+    }
+    .tag-blue { background: #EFF6FF; color: #2563EB; }
+    .tag-orange { background: #FFF7ED; color: #EA580C; }
 
-        .card-title-wrap {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 8px;
-        }
+    .pct-tag { font-size: 0.7cqw; color: #64748B; font-weight: 800; display: block; margin-top: 0.3cqw; }
+    
+    /* 强调用语 */
+    .bold-txt { font-weight: 800; color: #0F172A; }
 
-        .card-title {
-            font-size: clamp(20px, 2vw, 28px);
-            color: #0f172a;
-            font-weight: 800;
-        }
 
-        .price-tag {
-            font-size: clamp(16px, 1.8vw, 24px);
-            font-weight: 900;
-            color: #0f172a;
-        }
+    /* ========== 结论输出层 ========== */
+    .conclusion-row { margin-top: auto; }
+    
+    .conclusion-box {
+      border: 0.1cqw solid #E2E8F0; padding: 1cqw 1.2cqw; border-radius: 0.6cqw;
+      display: flex; flex-direction: column; gap: 0.4cqw;
+      animation: slideUp 0.8s ease 0.6s both;
+    }
+    
+    /* 左偏好结论配色 */
+    .c-primary { background: #EFF6FF; border-left: 0.5cqw solid #2563EB; border-color: #BFDBFE; }
+    .c-primary .concl-tag { color: #1D4ED8; }
+    
+    /* 右定案结论配色 */
+    .c-secondary { background: #F8FAFC; border-left: 0.5cqw solid #0F172A; border-color: #E2E8F0; }
+    .c-secondary .concl-tag { color: #0F172A; }
 
-        /* 定位与标签 */
-        .position-badge {
-            display: inline-block;
-            padding: 6px 12px;
-            border-radius: 6px;
-            font-size: clamp(12px, 1vw, 14px);
-            font-weight: 600;
-            margin-bottom: clamp(20px, 2.5vw, 32px);
-        }
+    .concl-tag { font-size: 0.75cqw; font-weight: 800; text-transform: uppercase; }
+    .concl-text { font-size: 0.9cqw; color: #1E293B; line-height: 1.6; font-weight: 500;}
+    .concl-text strong { font-weight: 800; color: #0F172A; }
+    
+    /* 针对要求2的陈列换行排版项 */
+    .point-item { display:flex; align-items:baseline; margin-bottom: 0.4cqw; }
+    .point-item:last-child { margin-bottom: 0; }
+    
+    /* 专有蓝字高亮 (左侧结论用)*/
+    .t-blue { color: #2563EB !important; }
 
-        .badge-low { background: #e2e8f0; color: #475569; }
-        .badge-high { background: #fef0c7; color: #906603; }
-
-        /* 特别处理RPA7由于黄色底纹所需的和谐版低端标签 */
-        .theme-yellow .badge-low.harmonized {
-            background: #f0ead2; 
-            color: #635a3f;
-        }
-
-        /* ------ 特性列表 (紧凑，非横向对比) ------ */
-        .feature-list {
-            position: relative;
-            z-index: 1;
-            display: flex;
-            flex-direction: column;
-            gap: 16px; 
-            list-style: none;
-            overflow-y: auto;
-            padding-right: 4px;
-        }
-
-        .feature-item {
-            background: rgba(255, 255, 255, 0.7);
-            border: 1px solid rgba(226, 232, 240, 0.8);
-            border-radius: 8px;
-            padding: clamp(12px, 1.5vh, 18px) 16px;
-            font-size: clamp(14px, 1.1vw, 17px);
-            color: #334155;
-            font-weight: 500;
-            border-left: 4px solid #cbd5e1;
-            line-height: 1.5;
-            backdrop-filter: blur(4px);
-        }
-
-        /* 滚动条 */
-        .feature-list::-webkit-scrollbar { width: 4px; }
-        .feature-list::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-
-        /* ================= 进场动画 ================= */
-        @keyframes slideIn {
-            0% { opacity: 0; transform: scale(0.97) translateY(15px); }
-            100% { opacity: 1; transform: scale(1) translateY(0); }
-        }
-
-        .card { animation: cardFadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) both; }
-        .card:nth-child(1) { animation-delay: 0.1s; }
-        .card:nth-child(2) { animation-delay: 0.2s; }
-        .card:nth-child(3) { animation-delay: 0.3s; }
-
-        @keyframes cardFadeIn {
-            0% { opacity: 0; transform: translateY(20px); }
-            100% { opacity: 1; transform: translateY(0); }
-        }
-    </style>
+    /* 动画 */
+    @keyframes revealCanvas { 0% { opacity: 0; transform: scale(0.98); } 100% { opacity: 1; transform: scale(1); } }
+    @keyframes slideUp { 0% { opacity: 0; transform: translateY(2cqw); } 100% { opacity: 1; transform: translateY(0); } }
+  </style>
 </head>
 <body>
 
-    <div class="ppt-wrapper">
-        <header>
-            <h1>离型纸产品路线图谱</h1>
-            <div class="subtitle">Release Paper Product Roadmap</div>
-        </header>
+  <div class="ppt-canvas">
+    
+    <!-- 全局页眉 -->
+    <header class="header">
+      <div class="title-group">
+        <h1>透明度争议分析</h1>
+        <div class="subtitle">偏好数据验证分析与离型材质产品战略定案</div>
+      </div>
+      <div class="stats-group">
+        <div class="stat-pill">有效样本 N = 77</div>
+        <div class="stat-pill">总占比 N = 1,038</div>
+      </div>
+    </header>
 
-        <div class="content-grid">
-            
-            <!-- 卡片 1 (商务冷灰基调 - 不变) -->
-            <div class="card" data-watermark="RPA6">
-                <div class="card-header">
-                    <div class="card-title-wrap">
-                        <div class="card-title">AD-OT-RPA6</div>
-                        <div class="price-tag">9.99$</div>
-                    </div>
-                    <div class="position-badge badge-low">定位：低端</div>
-                </div>
-                <ul class="feature-list">
-                    <li class="feature-item">双面硅油</li>
-                    <li class="feature-item">大数量</li>
-                    <li class="feature-item">一站式需求解决方案，配备“和纸胶带+刻刀+矫正板”</li>
-                </ul>
+    <main class="main-body">
+      
+      <!-- ============ 左侧半场：偏好验证 (扩大空间至占比近 ~60%) ============ -->
+      <section class="left-section">
+        <div class="section-title">01 / 离型透明度偏好对比</div>
+        
+        <div class="pref-cards-wrapper">
+          <!-- 全透明 -->
+          <div class="pref-card">
+            <div class="pref-img" style="background-image: url('https://wp-cdn.4ce.cn/v2/dy1Dgey.png');">
+              <div class="img-overlay-pct">59.74%</div>
             </div>
-
-            <!-- 卡片 2 (应用：晨曦浅黄底纹) -->
-            <div class="card theme-yellow" data-watermark="RPA7">
-                <div class="card-header">
-                    <div class="card-title-wrap">
-                        <div class="card-title">AD-OT-RPA7</div>
-                        <div class="price-tag">9.99$</div>
-                    </div>
-                    <!-- harmonized 用于将灰蓝底签稍作调整以融于黄底环境 -->
-                    <div class="position-badge badge-low harmonized">定位：尺寸迭代款，低端</div>
-                </div>
-                <ul class="feature-list">
-                    <li class="feature-item">RPA6尺寸迭代变小</li>
-                    <li class="feature-item">更大数量</li>
-                </ul>
+            <div class="pref-content">
+              <div class="p-head">
+                <span class="p-title">全透明 / 高清</span> <span class="p-n">(N=46)</span>
+              </div>
+              <div class="p-logic-box">
+                <div class="l-title">行为逻辑 - 透视预判</div>
+                <div class="l-desc">揭膜前识别色块与碎钻区；支持“循迹规划”进行跨区颜色追踪。</div>
+              </div>
+              <div class="p-logic-box">
+                <div class="l-title" style="color: #64748B;">心理动机 - 效能掌控</div>
+                <div class="l-desc">消除信息不对称，进行精准时间预算。</div>
+              </div>
             </div>
+          </div>
 
-            <!-- 卡片 3 (应用：相同的晨曦浅黄底纹 + 高端金边点缀线) -->
-            <div class="card theme-yellow premium-accent" data-watermark="PRO">
-                <div class="card-header">
-                    <div class="card-title-wrap">
-                        <div class="card-title">离型膜</div>
-                        <div class="price-tag">10.99~12.99$</div>
-                    </div>
-                    <div class="position-badge badge-high">定位：高端</div>
-                </div>
-                <!-- 100% 原始文本，无任何添加或删减 -->
-                <ul class="feature-list">
-                    <li class="feature-item">符号清晰可视，无遮挡</li>
-                    <li class="feature-item">提拉耳挂设计</li>
-                    <li class="feature-item">材质厚实</li>
-                    <li class="feature-item">边框美学设计</li>
-                    <li class="feature-item">配备收纳盒</li>
-                </ul>
+          <!-- 半透明 (需求1：调换了半透与纯白的配图背景) -->
+          <div class="pref-card">
+            <div class="pref-img" style="background-image: url('https://wp-cdn.4ce.cn/v2/d5TdC0G.png');">
+              <div class="img-overlay-pct" style="font-size: 1.1cqw; background: rgba(234, 88, 12, 0.85); color: #fff;">15.58%</div>
             </div>
+            <div class="pref-content">
+              <div class="p-head">
+                <span class="p-title">半透明 / 磨砂</span> <span class="p-n">(N=12)</span>
+              </div>
+              <div class="p-logic-box">
+                <div class="l-title">行为逻辑 - 光控显影</div>
+                <div class="l-desc">常光下屏蔽噪音，开启拷贝台时透出符号；减少塑料反光带来的视觉疲劳。</div>
+              </div>
+              <div class="p-logic-box">
+                <div class="l-title" style="color: #64748B;">心理动机 - 感官平衡</div>
+                <div class="l-desc">在导航便利与心理减压之间寻找折中点。</div>
+              </div>
+            </div>
+          </div>
 
+          <!-- 纯白 (需求1：调换了半透与纯白的配图背景) -->
+          <div class="pref-card">
+            <div class="pref-img" style="background-image: url('https://wp-cdn.4ce.cn/v2/bC9utjf.png');">
+              <div class="img-overlay-pct" style="font-size: 1.1cqw; background: rgba(71, 85, 105, 0.85); color: #fff;">24.68%</div>
+            </div>
+            <div class="pref-content">
+              <div class="p-head">
+                <span class="p-title">不透明 / 纯白</span> <span class="p-n">(N=19)</span>
+              </div>
+              <div class="p-logic-box">
+                <div class="l-title">行为逻辑 - 视觉清屏</div>
+                <div class="l-desc">彻底遮盖未完成符号，通过物理屏蔽缓解焦虑；利用白纸与画布建立强对比。</div>
+              </div>
+              <div class="p-logic-box">
+                <div class="l-title" style="color: #64748B;">心理动机 - 心理避风港</div>
+                <div class="l-desc">缓解“被淹没感 (Overwhelmed)”，提供即时成就感。</div>
+              </div>
+            </div>
+          </div>
         </div>
-    </div>
+
+        <!-- 需求2：文案更新 -->
+        <div class="conclusion-row">
+          <div class="conclusion-box c-primary">
+            <div class="concl-tag">Part 1 - 偏好确认关键结论</div>
+            <div class="concl-text">
+              <strong>75.42%</strong> 的用户要求具备透明度（全透<span class="t-blue">59.74%</span>+半透<span class="t-blue">15.58%</span>），以实现数据的<strong>“预读”</strong>功能，符号可视需求偏向明显。
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 右侧半场：对比与定夺 (=占40%) ============ -->
+      <section class="right-section">
+        <div class="section-title">02 / 全透明/半透明方案优劣势对比</div>
+        
+        <div class="table-wrapper">
+          <!-- 需求3：表格内容原封不动精准还原 -->
+          <table class="strategy-table">
+            <thead>
+              <tr>
+                <th class="col-mat">推演材质</th>
+                <th class="col-strat">产品策略</th>
+                <th class="col-adv">优点</th>
+                <th class="col-dis">劣势</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- 全透明原文对比 -->
+              <tr>
+                <td class="col-mat">
+                  <span class="mat-tag tag-blue">全透明 / 高清</span>
+                  <span style="font-size: 0.6cqw; color: #64748B; display: block;">(HD Clear)</span>
+                </td>
+                <td class="col-strat">
+                  专业效能管理系统
+                  <span class="pct-tag">占比：59.74%</span>
+                </td>
+                <td>
+                  <span class="bold-txt">极致效率：</span>支持“循迹切割”与“精准预判”。玩家可绕过格子，按图案边缘不规则剪裁以处理同色块。
+                </td>
+                <td>
+                  由于太透导致“边缘消失”，易点错位置（边框设计可解决）；强光下存在眩光干扰。
+                </td>
+              </tr>
+              <!-- 半透明原文对比 -->
+              <tr>
+                <td class="col-mat">
+                  <span class="mat-tag tag-orange">半透明 / 磨砂</span>
+                  <span style="font-size: 0.6cqw; color: #64748B; display: block;">(Translucent)</span>
+                </td>
+                <td class="col-strat">
+                  极致心流与护眼
+                  <span class="pct-tag">占比：15.58%</span>
+                </td>
+                <td>
+                  自带物理边界感，光线柔和，减少视觉噪音。
+                </td>
+                <td>
+                  <span class="bold-txt">效能损耗：</span>识别效率低，将产品降级为“盲盒模式”。微小符号在半透下会产生“虚化”，剥夺了玩家在揭膜前的预判权。
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- 需求2：文案更新与强制换行陈列排版 -->
+        <div class="conclusion-row">
+          <div class="conclusion-box c-secondary">
+            <div class="concl-tag">Part 2 - 最终产品线定夺结论</div>
+            <div class="concl-text">
+              
+              <!-- 阵列排版 1 -->
+              <div class="point-item">
+                <div><strong>全透明视窗提供“高清地图”：</strong>59.74% 的高阶用户选择全透，是因为其“导航价值”远超半透的“减压价值”，离型膜产品定位是专业效能提升工具。</div>
+              </div>
+              
+              <!-- 阵列排版 2 -->
+              <div class="point-item">
+                <div><strong>AR 抗眩光：</strong>采用 AR 涂层解决全透明方案强光反射对眼脑的困扰。</div>
+              </div>
+              
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+    </main>
+  </div>
 
 </body>
 </html>
