@@ -137,7 +137,6 @@
     <div class="ppt-screen">
         <!-- Header -->
         <header class="header">
-            <!-- 唯一调整点：仅仅更新了标题文案 -->
             <h1>离型纸品类对比分析</h1>
             <div class="meta">
                 <span>Category: Tool Accessories</span>
@@ -165,7 +164,10 @@
                 </div>
                 <div class="insight-card" style="border-left-color: #13C2C2;">
                     <div class="ic-title">市占率与品牌集中度：TOP 1</div>
-                    <div class="ic-desc">26年4月数据：AD在离型纸销售额市占率达 <span class="highlight">28%</span>，销量占 <span class="highlight">29%</span>，稳居品牌类目排名 <span class="alert">TOP 1</span>。<br>对比画布收纳（超40%）与钻石收纳（近40%）的高市占率，该品类仍拥有 <span class="highlight">近10% 的垄断增量空间</span>。</div>
+                    <!-- 本次调整点：还原全部一字不改的原文，运用内联 CSS 强行进行行高、字号和间距的视觉压缩，并放开截断行数 -->
+                    <div class="ic-desc" style="font-size: clamp(11.5px, 0.85vw, 14px); line-height: 1.35; letter-spacing: -0.3px; -webkit-line-clamp: 6;">
+                        26年4月数据：AD在离型纸销售额市占率达 <span class="highlight">28%</span>，销量占 <span class="highlight">29%</span>，稳居品牌类目排名 <span class="alert">TOP 1</span>。<br>对比画布收纳（超40%）与钻石收纳（近40%）的高市占率，该品类仍拥有 <span class="highlight">近10% 的垄断增量空间</span>。
+                    </div>
                 </div>
                 <div class="insight-card" style="border-left-color: #52C41A;">
                     <div class="ic-title">市场增速呈现：良性增长态势</div>
